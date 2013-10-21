@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{07B13E5A-5DB3-46A8-82E2-A616D9E232C7}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TestingLinearRegression</RootNamespace>
+    <AssemblyName>TestingLinearRegression</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Meta.Numerics">
+      <HintPath>..\AdaptiveRejectionSampling\Meta.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="LinearRegression.cs" />
+    <Compile Include="TestingLinearRegression.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AccessoryLib\AccessoryLib.csproj">
+      <Project>{BDB8DB62-528B-4F2D-8DB9-1ECACA8BFE0F}</Project>
+      <Name>AccessoryLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AdaptiveRejectionSampling\AdaptiveRejectionSampling.csproj">
+      <Project>{9E41A974-D5D3-4153-8D82-8A4E3D84ED68}</Project>
+      <Name>AdaptiveRejectionSampling</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BayesianEstimateLib\BayesianEstimateLib.csproj">
+      <Project>{BBE3F738-5A5C-42AF-98D9-A8656C866E36}</Project>
+      <Name>BayesianEstimateLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GibbsSampler\GibbsSampler.csproj">
+      <Project>{65A3BFE0-49CA-466C-93F3-A2EB3BFB2CA3}</Project>
+      <Name>GibbsSampler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NelderMeadMethod\NelderMeadMethod.csproj">
+      <Project>{9BF5041D-EF8A-414E-9E10-6331D584AC96}</Project>
+      <Name>NelderMeadMethod</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
