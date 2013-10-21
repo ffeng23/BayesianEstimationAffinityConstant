@@ -28,9 +28,17 @@ namespace NelderMeadMethod
         /// <param name="_lower">the _lower bound for the domain</param>
         /// <param name="_upper">the _upper bound for the domain</param>
         /// <param name="_logLimit">the limit in log format that will need to reach to be nonzero value, so this means
-        /// if we reach this value (of fucntion evaluation), we are basically done with the job</param>
+        /// if we reach this value (of fucntion evaluation), we are basically done with the job. The reason we need this is 
+        /// that we are using log function, and log(0) is not allowed, so we need to specify what is the value that is close to
+        /// zero. 
+        /// </param>
+        /// <param name="_functionNormConstant">we need this one for some of the function that to normalize the value, in case 
+        /// this _LogLimit is be not good. Log(x) is define by the C# to be -700., but sometimes, this is not very close enough to
+        /// Zero. So we need to add this normal constant to scale it and we still are able to run function.
+        /// </param>
         /// <returns></returns>
-        public static double FindNonZeroValue(LogDistributionFuctionDelegate  _logfunc, double _x0, double _x1, double _lower, double _upper, double _logLimit, ref double _functionNormConstant )
+        public static double FindNonZeroValue(LogDistributionFuctionDelegate  _logfunc, double _x0, double _x1, 
+            double _lower, double _upper, double _logLimit, ref double _functionNormConstant )
         {
             double xb;
             while (true)
