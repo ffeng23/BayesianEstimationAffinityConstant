@@ -24,7 +24,7 @@ namespace testingNelderMead1D
             }
 
             //now write the output
-            Console.WriteLine("write the output............");
+            Console.WriteLine("Write the output............");
             DataIO.WriteDataTable(x, y, "normalDist.txt",  new List<string> { "x", "y" });
             Console.WriteLine("Done............");
 
