@@ -88,23 +88,29 @@ namespace GibbsSampler
                 //arms.Add( new AdaptiveRejectionMetropolisSampling(this.CP_Initials[i], distributions[i], this.C_Bounds[i][0], this.C_Bounds[i][1]);
             }
 
-            Console.WriteLine("now read to draw samples..............");
+            Console.WriteLine("Start drawing samples..............");
             //run to generatate samples
             StreamWriter writer = new StreamWriter("learReg.txt");
             //writer.WriteLine("ka\tkb\tkM\tconc\tRmax\tR0\tVar");
+            int increPercent = 5;
+            int runningPercent = 0;
+            Console.Write("Progress:");
             for (int i = 1; i < _numberOfSamples; i++)
             {
-                //if(i%10==1)
-                    Console.WriteLine("running " + i + " steps");
+                if (((double)i) / _numberOfSamples * 100 >= runningPercent)
+                {
+                    Console.Write("..." + runningPercent + "%(" + i + "/"+_numberOfSamples+")" );
+                    runningPercent += increPercent;
+                }
                 //for each different paramter, gerenate one sample from its target distribution
                 for (int j = 0; j < samples.Count; j++)
                 {
-                    Console.WriteLine("\tsub " + j + " steps; seed is "+AccessoryLib.AceessoryLib.SEED );
+                    //Console.WriteLine("\tsub " + j + " steps; seed is "+AccessoryLib.AceessoryLib.SEED );
                     LogDistributionFuctionDelegate func = C_UpdateDistributionDelegate(current, j);
                     arms = new AdaptiveRejectionMetropolisSampling( previous[j],current[j], func, this.C_Bounds[j][0], this.C_Bounds[j][1]);
-                    Console.WriteLine("\t\tfinished with ARMS set up...");
+                    //Console.WriteLine("\t\tfinished with ARMS set up...");
                     double newSample = arms.GetRandomSample(rngs[j]);
-                    Console.WriteLine("\t\tfinished with sample drawing..."+newSample );
+                    //Console.WriteLine("\t\tfinished with sample drawing..."+newSample );
                     samples[j].Add(newSample);
                     if (newSample != current[j])
                     {
@@ -119,7 +125,7 @@ namespace GibbsSampler
                     }
                     //now update the distribution function for the next parameter
                     //distributions[(j + 1) % (samples.Count )] = C_UpdateDistributionDelegate(current, (j + 1) % (samples.Count ));
-                    Console.WriteLine("\tfinished with sub steps...");
+                    //Console.WriteLine("\tfinished with sub steps...");
                     
                 }//for different parameters
                 writer.WriteLine(""); writer.Flush();

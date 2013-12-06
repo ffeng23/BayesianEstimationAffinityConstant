@@ -29,7 +29,7 @@ namespace testingNelderMead1D
             Console.WriteLine("Done............");
 
             double funcNormalConst = 0;
-            Console.WriteLine("start testing nelder mead algorithm..........");
+            Console.WriteLine("Start testing nelder mead algorithm..........");
             double nonzero = NelderMead1D.FindNonZeroValue(logNormalDist, 0, 3000, 0, 3000, NelderMeadMethod.NelderMead1D.LOG_LIMIT, ref funcNormalConst);
             Console.WriteLine("the nonzero value is " + nonzero);
             Console.WriteLine("doing............");

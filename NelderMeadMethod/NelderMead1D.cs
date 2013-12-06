@@ -53,7 +53,7 @@ namespace NelderMeadMethod
                 {
                     return _x1;
                 }
-                Console.WriteLine("\t\tIn foundNonZeroValue:x0 is " + _x0 + "; x1 is " + _x1 + ";fo is " + f0 + ";f1 is " + f1);
+                //Console.WriteLine("\t\tIn foundNonZeroValue:x0 is " + _x0 + "; x1 is " + _x1 + ";fo is " + f0 + ";f1 is " + f1);
                 xb = FindNonZeroValueKernelLarger(_logfunc, _x0, _x1, _lower, _upper, _logLimit, f0, f1, _functionNormConstant, C_MaximumIterations);
                 double fxb = _logfunc(xb, _functionNormConstant);
                 if (fxb<=_logLimit)
@@ -90,7 +90,7 @@ namespace NelderMeadMethod
             while(true)  //keep going
             {
                 count++;
-                Console.WriteLine("looping steps:" + count);
+                //Console.WriteLine("looping steps:" + count);
                 double xtemp, ftemp;
                 fw = fn; xw = xn;
                 //ordering

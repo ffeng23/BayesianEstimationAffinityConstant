@@ -1026,7 +1026,8 @@ namespace AdaptiveRejectionSampling
             }
             if (index ==-1)//this only means we can not find the point in the support array, so this means the expHnOfX is zero. nothing to worry so far.
             {
-                Console.WriteLine ("WARNING.........x doesn't belong the defined envelope function");
+                //Be careful here!!!!
+                //Console.WriteLine ("WARNING.........x doesn't belong the defined envelope function");
                 return 0;
             }
             return Math.Exp(this.CP_EnvelopeFunctionOfLogTarget[index][0] * _x + this.CP_EnvelopeFunctionOfLogTarget[index][1]);

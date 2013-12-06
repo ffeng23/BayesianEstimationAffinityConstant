@@ -26,9 +26,14 @@ namespace BayesianEstimationAffinityConstant
     {
         public MainWindow()
         {
+            Console.WriteLine("Welcome!!!!");
+            Console.WriteLine("Start initialing interface......");
+
             InitializeComponent();
 
             chtManager = new ChartingManager();
+            Console.WriteLine("Done!");
+            Console.WriteLine("Please specify the input......");
         }
         public System.Windows.Controls.TextBox LogTextBlock
         {
@@ -47,8 +52,8 @@ namespace BayesianEstimationAffinityConstant
         private double deltaT;
         //private double Rmax;
 
-        private List<double> _time;
-        private List<double> _ru;
+        //private List<double> _time;
+        //private List<double> _ru;
 
         private double var;
 
@@ -134,17 +139,18 @@ namespace BayesianEstimationAffinityConstant
 
         private void BtnRunBayesian_Click(object sender, RoutedEventArgs e)
         {
+
             this.WindowState = WindowState.Minimized;
             this.Topmost = true;
             this.Topmost = false;
             //this.IsVisible = false;
-            Console.WriteLine("*****testing. fitting the model......");
+            //Console.WriteLine("*****testing. fitting the model......");
 
             //look to see whether we want to use the new simulated input or the one from the file
             string fileAttach = "simulation_attach_noiseShort.txt";
             string fileDetach = "simulation_detach_noiseShort.txt";
             
-            Console.WriteLine("*****reading the input from disk*****");
+            Console.WriteLine("Reading the input files from disk.....");
             
             fileAttach = Tbx_AttachDataFile.Text ;
             fileDetach = Tbx_DetachDataFile.Text;
@@ -225,7 +231,9 @@ namespace BayesianEstimationAffinityConstant
 
             RenderChartingTracePlots(runResultData , pChartTracePlot);
 
-            Console.WriteLine("Done...........");
+            Console.WriteLine("Thanks for using this software!");
+            Console.WriteLine("\t----Report bug to ffeng@bu.edu");
+            Console.WriteLine("\t----Copyright by Feng Feng Boston University 2013");
 
             this.WindowState = WindowState.Normal;
             this.Topmost = false;

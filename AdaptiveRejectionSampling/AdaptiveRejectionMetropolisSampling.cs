@@ -54,7 +54,7 @@ namespace AdaptiveRejectionSampling
                 fX=Math.Exp(CP_LogTargetDistribution(X, this.CP_ProposalDistribution.FunctionNormConstant ));
                 
                 exphX=this.CP_ProposalDistribution.ExpHnOfX(X);
-                Console.WriteLine("calling in loop fx:"+fX+"; expHx:"+exphX+";u:"+u);
+                //Console.WriteLine("calling in loop fx:"+fX+"; expHx:"+exphX+";u:"+u);
 
                 //step 3
                 if (u > fX / exphX)
@@ -77,7 +77,7 @@ namespace AdaptiveRejectionSampling
             double f_XA=fX;//evaluation of XA is done in above, we don't have to do it again.
             double f_Xcur=Math.Exp(this.CP_LogTargetDistribution(this.CP_X_cur, this.CP_ProposalDistribution.FunctionNormConstant));
             double expHnXA=exphX;//evaluation of expHnX is done above, we don't have to do it again.
-            Console.WriteLine("calling in MH step");
+            //Console.WriteLine("calling in MH step");
             double expHnXcur=this.CP_ProposalDistribution.ExpHnOfX(this.CP_X_cur);
             
             double r1, r2;
