@@ -108,6 +108,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AccessoryLib\AccessoryLib.csproj">
+      <Project>{BDB8DB62-528B-4F2D-8DB9-1ECACA8BFE0F}</Project>
+      <Name>AccessoryLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AdaptiveRejectionSampling\AdaptiveRejectionSampling.csproj">
       <Project>{9E41A974-D5D3-4153-8D82-8A4E3D84ED68}</Project>
       <Name>AdaptiveRejectionSampling</Name>

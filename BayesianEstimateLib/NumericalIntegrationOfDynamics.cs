@@ -142,7 +142,16 @@ namespace BayesianEstimateLib
 
             return deltaR;
         }
-        
+
+        /// <summary>
+        /// not implemented, don't use
+        /// </summary>
+        /// <param name="_params"></param>
+        public override void setParameters(double[] _params)
+        {
+            throw new NotImplementedException();
+        }
+
 
     }//end of class
 

@@ -1,0 +1,372 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BayesianEstimateLib
+{
+
+    /// <summary>
+    /// model is A+B=AB*=AB, 
+    /// ka, kd is for first phase
+    /// ka2, kd2 is for the second phase
+    /// 
+    /// SSPR_r0 is for starting RU for AB (stable form) and R0_AB_Star are for the
+    /// transition form.
+    /// </summary>
+    public class TwoState:SimulationSPR 
+    {
+        
+
+        protected double _ka2;
+        protected double _kd2;
+
+        //protected double R0_AB;
+        protected double _R0_AB_Star;
+
+        protected double[] _R_AB_Att;
+        protected double[] _R_AB_Star_Att;
+
+        protected double[] _R_AB_Det;
+        protected double[] _R_AB_Star_Det;
+
+        /*protected double[] _Association_RUs;
+        protected double[] _Association_Times;
+        protected double[] _Dissociation_RUs;
+        protected double[] _Dissociation_Times;
+
+        protected double _dt; */
+        
+        /*public SPR_Model_TwoState(double[] _ts_association, double[] _ts_dissociation)
+        {
+            this._times=_ts;
+            _dt = -1;
+            //do the 
+        }*/
+        public TwoState()
+            : base()
+        {
+            //empty constructor with unspecified parameters
+            //set default, uninitialized values;
+            this._ka = -1;
+            this._kd = -1;
+            this._ka2 = -1;
+            this._kd2 = -1;
+            this._conc = -1;
+            this._Rmax = -1;
+            this.SSPR_r0 = -1;
+            this._R0_AB_Star = -1;
+            this._duration_attach = -1;
+            this._duration_detach = -1;
+            //this._deltaT =;
+            this._kM = -1;
+
+            this._time_attach = null;
+            this._time_detach = null;
+        }
+
+        /// <summary>
+        /// the constructor with parameter array
+        /// </summary>
+        /// <param name="_params">contains the parameter lists. 
+        ///     the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2, 4-conc, 5-Rmax, 6-R0_AB,
+        ///     7-R0_AB_Star
+        ///     8-attachDuration, 9-detachDuration,11-deltaT</param>
+        public TwoState(double[] _params):base()
+        {
+            //check for the validity for the input
+            if (_params.Count() < 10)
+            {
+                throw new Exception("the input parameter array is not valid. doesn't contain enough elements");
+            }
+            this._time_attach = null;
+            this._time_detach = null;
+
+            this._duration_attach = -1;
+            this._duration_detach = -1;
+            this._kM = -1;
+            setParameters(_params);
+            
+            //this._fillTimeArrays();
+        }
+
+        /// <summary>
+        /// here in this derived class, we also need to initialize the intermediate arrays,
+        /// AB and AB_Start
+        /// </summary>
+        protected override void _fillTimeArrays()
+        {
+            base._fillTimeArrays();
+            
+            _R_AB_Att = new double[_ru_attach.Count];
+            _R_AB_Star_Att = new double[_ru_attach.Count];
+
+            _R_AB_Det = new double[_ru_detach.Count];
+            _R_AB_Star_Det = new double[_ru_detach.Count];
+            
+            _R_AB_Att[0] = 0 ;
+            _R_AB_Star_Att[0] = 0;
+
+            _R_AB_Det[0] = this.SSPR_r0;
+            _R_AB_Star_Det[0] = this.SSPR_r0;
+        }
+
+        public override void run_Attach()//this is the Euler
+        {
+            //check for the validity of input
+            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _conc < 0 || _Rmax < 0)
+            {
+                throw new Exception("unitialized parameters");
+            }
+            if (this._time_attach == null || this._time_detach == null)
+            {
+                throw new Exception("unitialized time arrays");
+            }
+
+            //start building the numerical integration
+             //_ru.Add(0);the _ru_attach has been initialized and added with all zeros in the base class.
+            _R_AB_Att[0] = 0 ;
+            _R_AB_Star_Att[0] = 0;
+            _ru_attach[0] = _R_AB_Star_Att[0] + _R_AB_Att[0];
+            double dR_AB_Star_per_dt;
+            double dR_AB_per_dt;
+            double dt;
+            for( int i=0; ;i++)
+            {
+	            
+	            dR_AB_Star_per_dt=_ka*_conc*(_Rmax- this._R_AB_Att[i]-this._R_AB_Star_Att[i])
+                                        -_kd*_R_AB_Star_Att[i]+_kd2*_R_AB_Att[i]-_ka2*_R_AB_Star_Att[i];
+                dR_AB_per_dt = _ka2 * _R_AB_Star_Att[i] - _kd2 * _R_AB_Att[i];
+	            
+	            //double deltaR = kf*_conc*(_Rmax-_ru_attach[i])-kr*_ru_attach[i];
+	            if(i>=_ru_attach.Count -1 )
+	                {
+                        break;
+		                
+	                }
+                dt = this._time_attach[i + 1] - this._time_attach[i];
+                _R_AB_Att[i + 1] = dR_AB_per_dt * dt + _R_AB_Att[i];
+                _R_AB_Star_Att[i + 1] = dR_AB_Star_per_dt * dt + _R_AB_Star_Att[i];
+                _ru_attach[i + 1] = _R_AB_Att[i+1]+_R_AB_Star_Att[i+1];
+            }
+        
+        }
+        public override void run_Detach()
+        {
+            //check for the validity of input
+            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _conc < 0 || _Rmax < 0)
+            {
+                throw new Exception("unitialized parameters");
+            }
+            if (this._time_attach == null || this._time_detach == null)
+            {
+                throw new Exception("unitialized time arrays");
+            }
+            
+            //in this one, it is abit tricky, we need to figure out what to do with R0
+            if (SSPR_r0 < 0 && _R0_AB_Star < 0)
+            {
+                this._R_AB_Det[0] = _R_AB_Att[_R_AB_Att.Count() - 1];
+                this._R_AB_Star_Det[0] = _R_AB_Star_Att[_R_AB_Star_Att.Count() - 1];
+            }
+            else
+            {
+                this._R_AB_Det[0] = this.SSPR_r0 ;
+                this._R_AB_Star_Det[0] = this._R0_AB_Star;
+            }
+
+            _ru_detach[0] = _R_AB_Det[0] + _R_AB_Star_Det[0];
+
+            //now doing the calculation
+            double dR_AB_Star_per_dt;
+            double dR_AB_per_dt;
+            double dt;
+            //double conc0 = 0;
+            for (int i = 0; ; i++)
+            {
+
+                dR_AB_Star_per_dt = //_ka * 0 * (_Rmax - this._R_AB_Det[i] - this._R_AB_Star_Det[i])
+                                        -1* _kd * _R_AB_Star_Det[i] + _kd2 * _R_AB_Det[i] - _ka2 * _R_AB_Star_Det[i];
+                dR_AB_per_dt = _ka2 * _R_AB_Star_Det[i] - _kd2 * _R_AB_Det[i];
+
+                //double deltaR = kf*_conc*(_Rmax-_ru_attach[i])-kr*_ru_attach[i];
+                if (i >= _ru_detach.Count - 1)
+                {
+                    break;
+
+                }
+                dt = this._time_detach[i + 1] - this._time_detach[i];
+                _R_AB_Det[i + 1] = dR_AB_per_dt * _deltaT + _R_AB_Det[i];
+                _R_AB_Star_Det[i + 1] = dR_AB_Star_per_dt * _deltaT + _R_AB_Star_Det[i];
+                _ru_detach[i + 1] = _R_AB_Det[i + 1] + _R_AB_Star_Det[i + 1];
+            }
+            //done!!
+        }
+
+        /// <summary>
+        /// now set the parameters!!!, only for parameters, not for duration, time, deltaT
+        /// there are two different way to do the calculation depending on R0.
+        /// if we want to do the simulation, do we would not worry about R0, 
+        /// let the system to take values from end of the association phase
+        /// otherwise we will need to fit it as parameters. if we don't fit it
+        /// we will put in negative values to indicate the system to take values
+        /// from association phase end.
+        /// </summary>
+        /// <param name="_params">it has the order, the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2,
+        /// 4-conc, 5-Rmax, 6-R0_AB,
+        ///     7-R0_AB_Star, 8-association duration, 9-association duration, 10-deltaT
+        ///     So far DON"T have kM in there now.
+        ///     here we also allow variable length of params, but only
+        ///     allow default value of deltaT, duration of association or detach.
+        ///     
+        /// 
+        ///     </param>
+        public override void setParameters(double[] _params)
+        {
+            //here we allow variable length
+            if (_params.Count() < 8)
+            {
+                throw new Exception("the input parameter array is not valid. doesn't contain enough elements");
+            }
+            this._ka = _params[0];
+            this._kd = _params[1];
+            this._ka2 = _params[2];
+            this._kd2 = _params[3];
+            this._conc = _params[4];
+            this._Rmax = _params[5];
+            this.SSPR_r0 = _params[6];
+            this._R0_AB_Star = _params[7];
+
+            bool updateTimeArrays = false;
+            if (_params.Count() >= 9&&_params[8]>0)
+            {
+                updateTimeArrays = true;
+                this._duration_attach = _params[8];
+            }
+            if (_params.Count() >= 10&&_params[9]>0)
+            {
+                updateTimeArrays = true;
+                this._duration_detach = _params[9];
+            }
+            if (_params.Count() >= 11&&_params[10]>0)
+            {
+                updateTimeArrays = true;
+                this._deltaT  = _params[10];
+            }
+
+            if (updateTimeArrays)
+            {
+                _fillTimeArrays();
+            }
+        }
+        /// <summary>
+        /// override the original one in the base class, but leave this one unavailable
+        /// </summary>
+        /// <param name="_ka"></param>
+        /// <param name="_kd"></param>
+        /// <param name="_kM"></param>
+        /// <param name="_conc"></param>
+        /// <param name="_Rmax"></param>
+        /// <param name="_r0"></param>
+        public override void setParameters(double _ka, double _kd, double _kM, double _conc, double _Rmax, double _r0
+                                                  )
+        {
+            throw new NotImplementedException("don't call this one, please");
+        }
+
+        /// <summary>
+        /// a function used to add new values to the Time array
+        /// </summary>
+        /// <param name="_tVals">array of values to be added</param>
+        public override void addValueSToTimeArr_attach(List<double> _tVals)
+        {/*
+            for (int i = 0; i < _tVals.Count; i++)
+            {
+                addValueToTimeArr_attach(_tVals[i]);
+                if (i % 100 == 0)
+                {
+                    Console.WriteLine("doing i=" + i + " round of adding..............");
+                }
+            }
+          
+            if (_time_attach == null)
+            {
+                throw new Exception("unitialized time array");
+            }
+            _time_attach = MergeArrays(_time_attach, _tVals);*/
+            //check the wether need to enlarge the AB and AB_star arrays, since they are new.
+            base.addValueSToTimeArr_attach(_tVals);
+            if(this.RU_AB_Attach.Count()!= _time_attach.Count())
+            {
+                this._R_AB_Att =new double[_time_attach.Count()];
+            }
+            if (this.RU_AB_Star_Attach.Count() != _time_attach.Count())
+            {
+                this._R_AB_Star_Att = new double[_time_attach.Count()];
+            }
+        }
+
+
+
+        public override void addValueSToTimeArr_detach(List<double> _tVals)
+        {
+/*            if (_time_detach == null)
+            {
+                throw new Exception("unitialized time array");
+            }
+            
+            for (int i = 0; i < _tVals.Count; i++)
+            {
+                addValueToTimeArr_detach(_tVals[i]);
+            }* /
+
+            _time_detach = MergeArrays(_time_detach, _tVals);
+            //check the wether need to enlarge the ru_attach
+            for (int i = _ru_detach.Count; i < _time_detach.Count(); i++)
+            {
+                _ru_detach.Add(0);
+            }
+            */
+            base.addValueSToTimeArr_detach(_tVals);
+            if (this.RU_AB_Detach.Count() != _time_detach.Count())
+            {
+                this._R_AB_Det = new double[_time_detach.Count()];
+            }
+            if (this.RU_AB_Star_Detach.Count() != _time_detach.Count())
+            {
+                this._R_AB_Star_Det = new double[_time_detach.Count()];
+            }
+        }
+
+        public double[] RU_AB_Attach
+        {
+            get { return _R_AB_Att; }
+        }
+        public double[] RU_AB_Star_Attach
+        {
+            get { return _R_AB_Star_Att; }
+        }
+        public double[] RU_AB_Detach
+        {
+            get { return _R_AB_Det; }
+        }
+        public double[] RU_AB_Star_Detach
+        {
+            get { return _R_AB_Star_Det; }
+        }
+
+
+        /*protected void _Simulate()
+        {
+            _RUs[0]=0;
+
+            for (int i = 1; i < _times.Count(); i++)
+            {
+                if (this._dt <= 0)
+                {
+                    this._dt=
+                }
+            }
+        }*/
+    }//end of class
+}

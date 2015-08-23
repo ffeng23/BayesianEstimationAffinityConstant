@@ -5,6 +5,9 @@ using System.Text;
 
 namespace BayesianEstimateLib
 {
+    /// <summary>
+    /// this class is the same as the numericalIntegrationOfDynamics. use that one please 
+    /// </summary>
     public sealed class MassTransportModel:SimulationSPR 
     {
         public MassTransportModel(double _ka, double _kd, double _conc, double _Rmax, double _r0,
@@ -21,7 +24,7 @@ namespace BayesianEstimateLib
             {
 
                 
-                double deltaR = _kM * ( _conc  - _kd/_ka * _ru_attach[i]/(_Rmax-_ru_attach[i]));
+                double deltaR = _kM * ( _conc*_ka*(_Rmax-_ru_attach[i])  - _kd * _ru_attach[i])/(_kM+_ka*(_Rmax-_ru_attach[i]));
                 if (i >= _ru_attach.Count - 1)
                 {
                     break;
@@ -51,6 +54,11 @@ namespace BayesianEstimateLib
                 }
                 _ru_detach[i + 1] = deltaR * (_time_detach[i + 1] - _time_detach[i]) + _ru_detach[i];
             }
+        }
+        public override void setParameters(double[] _params)
+        {
+            //don't use this one.
+            throw new Exception("don't use me yet, since I am not done");
         }
     }//end of class
 }

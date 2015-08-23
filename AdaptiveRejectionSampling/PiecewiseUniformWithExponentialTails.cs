@@ -19,7 +19,7 @@ namespace AdaptiveRejectionSampling
     /// </summary>
     public class PiecewiseUniformWithExponentialTails
     {
-        const double ZERO = 1E-20;
+        const double ZERO = 1E-4;
         /// <summary>
         /// empty constructor is not allowed for calling (by protected).
         /// </summary>
@@ -29,7 +29,7 @@ namespace AdaptiveRejectionSampling
 
         }
         /// <summary>
-        /// Constructor with support points decided.
+        /// Constructor with support points decided. (by proteted)
         /// </summary>
         /// <param name="_supportPoints">the support points vector, this is on the x axis, so this the abscissae, 
         /// it could be bounded on both end or otherwise. 
@@ -64,6 +64,7 @@ namespace AdaptiveRejectionSampling
             CP_SupportPoints  = new List<double>();
             CP_EnvelopeFunctionOfLogTarget = new List<List<double>>();
             */
+            this.C_OriginalNumberOfSupportPoints = _numberOfSupportPoints;
             this.C_InitialValue0 = _initialValuePrevious;
             this.C_InitialValue1 = _initialValueCurrent;
             InitializeElements();
@@ -110,9 +111,20 @@ namespace AdaptiveRejectionSampling
                 
 
             //add new code to take care of the cases where the nonzero region for Target function is too small, which will leave the support array is too small to partition
-                while (true)
+                int loopCount = 0;    
+            while (true)
                 {
-                    this.CP_SupportPoints = new List<double>();   //we add this to make sure the suppor array now is brand new. this is because sometimes we need to regenerate the support array when we did not found the global optimum the first time which leave us with an overflow of the double values (infinity)
+                    if (loopCount > 15)
+                    {
+                        //most likely we are trying too desperately for searching the support array bounds,
+                        //we might want to jump out
+                        throw new AccessoryLib.InappropriateSupportArrayException("Error in partioning the support array for Gibbs sampling, please restart the application and specify the correct bounds and initial values for the parameter!!");
+                    }
+                    loopCount++;
+
+                    //Console.WriteLine("\t\tin the generate support point array while loop.."+loopCount+"..");
+                    this.CP_SupportPoints = new List<double>();   //we add this to make sure the suppor array now is brand new. this is because sometimes we need to regenerate the support array 
+                                //when we did not found the global optimum the first time which leave us with an overflow of the double values (infinity)
 
 
                     double starting;
@@ -280,17 +292,19 @@ namespace AdaptiveRejectionSampling
                     //here we need to check where the support array is too narrow, which means the array is a point.
                     if (
                         (_upperBound == 0 && _lowerBound == 0) ||
-                        (_upperBound != 0 && (((_upperBound - _lowerBound) / _upperBound < 1E-7) && ((_upperBound - _lowerBound) / _upperBound > -1E-7))) ||
-                        (_lowerBound != 0 && (((_upperBound - _lowerBound) / _lowerBound < 1E-7) && ((_upperBound - _lowerBound) / _lowerBound > -1E-7)))
+                        (_upperBound != 0 && (((_upperBound - _lowerBound) / _upperBound < 1E-10) && ((_upperBound - _lowerBound) / _upperBound > -1E-10))) ||
+                        (_lowerBound != 0 && (((_upperBound - _lowerBound) / _lowerBound < 1E-10) && ((_upperBound - _lowerBound) / _lowerBound > -1E-10)))
 
                     )
                     {
-                        this.C_FunctionNormConstant += 10; //relax the nozero region
+                        this.C_FunctionNormConstant *=2; //20; //relax the nozero region
                         _upperBound = originalUpperBound;
                         _lowerBound = originalLowerBound;
                     }
                     else
                     {
+                       // Console.WriteLine("****Finally done!");
+
                         break;
                     }
                 }//end of while loop to make sure the support array is not too narrow 
@@ -504,6 +518,7 @@ namespace AdaptiveRejectionSampling
         private List<double> SearchLowerBound(LogDistributionFuctionDelegate _LogFunction, double startingPoint, double _lower)
         {
             List<double> retList = new List<double>(2);
+            double startingPoint_Orig=startingPoint;
             double f=Math.Exp(_LogFunction(_lower, this.C_FunctionNormConstant ));
             if (f != 0 && !Double.IsNaN(f) && !double.IsInfinity(f))
             {
@@ -517,11 +532,12 @@ namespace AdaptiveRejectionSampling
             //double last = f;
             if (Double.IsInfinity(_lower))
             {
-                _lower = -1E20;
+                _lower = -1E26;
             }
-            while (gap >1E-6)
+            while (gap >ZERO||((startingPoint-startingPoint_Orig)<1E-200&&(startingPoint-startingPoint_Orig)>-1E-200) )
             {
-                step = (startingPoint - _lower) / 2; double temp = Math.Exp(_LogFunction(step + _lower, this.C_FunctionNormConstant ));
+                step = (startingPoint - _lower) / 2; 
+                double temp = Math.Exp(_LogFunction(step + _lower, this.C_FunctionNormConstant ));
                 if (temp <= Math.Exp(NelderMead1D.LOG_LIMIT) || Double.IsNaN(temp))
                 {
                     _lower=step+_lower;
@@ -547,6 +563,7 @@ namespace AdaptiveRejectionSampling
         /// <returns>at position 0, the biggest value that is not zero;position 1, smallest value that is zero. or NaN when the both are upper, or the upper is not zero itself.</returns>
         private List<double> SearchUpperBound(LogDistributionFuctionDelegate _LogFunction, double startingPoint, double _upper)
         {
+            double startingPoint_Orig=startingPoint;
             List<double> retList = new List<double>(2);
             double f =Math.Exp( _LogFunction(_upper, this.C_FunctionNormConstant));
             if (f != 0 && !double.IsNaN(f) && !double.IsInfinity(f))
@@ -556,13 +573,13 @@ namespace AdaptiveRejectionSampling
                 return retList;
             }
             double step;
-            double gap = 1E10;
+            double gap = 1E13;
             if (Double.IsInfinity(_upper))
             {
                 _upper = 1E20;
             }
             //double last = f;
-            while (gap > 1E-6||gap<-1E-6)
+            while (gap > ZERO || ((startingPoint - startingPoint_Orig) < 1E-200 && (startingPoint - startingPoint_Orig) > -1E-200))
             {
                 step = (  _upper -startingPoint) / 2;
                 double temp =Math.Exp( _LogFunction(step + startingPoint,C_FunctionNormConstant ));
@@ -919,6 +936,120 @@ namespace AdaptiveRejectionSampling
             line.Add(slope); line.Add(intercept);
             CP_EnvelopeFunctionOfLogTarget.Add(line);
         }
+        /// <summary>
+        /// this function is used to go through _H and _S to calculate the log of pdf value (actually before the exp(
+        /// and figure out whether we need to rescale/reduce the number, otherwise we will have a infinity value . reture a constant
+        /// so to used for the later calculation
+        /// </summary>
+        /// <param name="_H"></param>
+        /// <param name="_S"></param>
+        /// <returns></returns>
+        public double GetNormalizationConstantForGeneratePDFEnvFunc(List<List<double>> _H, List<double> _S)
+        {
+            //2014/12/24 add new code to take care of the cases where due to the FunctionNormConstant the exp(H[0][0]*_S[1]+_H[0][1]) is too big, "infinity".
+            //here we just need to decrease all the entries in the PDF array a fixed constant to make it calculable.
+            //this is fine, as long as all the elements in the PDF array is changed proportionally. because the pdf and cdf are all
+            //relative and will be normalized anyway.
+
+            double tempFuncNormConstant = 0;
+            //here we need to first go through the array to get the log(p) (here, it means not exponential it yet) and figure 
+            //out whethere we need to normalize it first to get rid of infinity values.
+
+            //first the left tail, 
+            double temp;
+            double leftTail_1 = _H[0][0] * _S[1] + _H[0][1];
+            double leftTail_2 = _H[0][0] * _S[0] + _H[0][1];
+            double max_runningValue = leftTail_1;
+            if (leftTail_2 > max_runningValue)
+            {
+                max_runningValue = leftTail_2;
+            }
+            //special case
+            if (_H[0][0] == 0)
+            {
+                temp = _H[0][1];
+                if (temp > max_runningValue)
+                {
+                    max_runningValue = temp;
+                }
+            }
+
+            //p.Add(max_runningValue);
+
+            //middle ones
+            //doing the middle ones, uniform in exp format
+            for (int i = 1; i < _H.Count - 1; i++)
+            {
+                temp = _H[i][1] * (_S[i + 1] - _S[i]);
+                //p.Add(temp);
+                //p_total += p[i];//the one just added, also could be p[p.count-1]
+                if (temp > max_runningValue)
+                {
+                    max_runningValue = temp;
+                }
+            }
+            //right tail, _h: ax+b, for expontial, this exp(ax+b), where a<0, and x<-(sn, -inf), integration of 
+            //this:  f(exp(ax+b)dx) =>1/a*exp(ax+b)|[+inf, Sn], f is the integral  ==>-1/a*exp(a*s1-b)
+            double rightTail_1 = (_H[_H.Count - 1][0] * _S[_S.Count - 1] + _H[_H.Count - 1][1]);
+            double rightTail_2 = (_H[_H.Count - 1][0] * _S[_S.Count - 2] + _H[_H.Count - 1][1]);
+            if (_H[_H.Count - 1][0] != 0)
+            {
+                if (rightTail_1 > max_runningValue)
+                {
+                    max_runningValue = rightTail_1;
+                }
+                if (rightTail_2 > max_runningValue)
+                {
+                    max_runningValue = rightTail_2;
+                }
+            }
+            else
+            {
+                temp = (_H[_H.Count - 1][1]);
+                if (temp > max_runningValue)
+                {
+                    max_runningValue = temp;
+                }
+            }
+            //p.Add(max_runningValue);
+
+            //here we leave the case where the min value is too small, exp(minVal)=0 for the future.
+            //now with the max value, we need to see whether we need to normalize/reduce the values for a calculable exp numbers
+            temp = max_runningValue;
+            while (Double.IsInfinity(Math.Exp(temp)))
+            {
+                //we need to reduce
+                tempFuncNormConstant -= 100;
+                temp=max_runningValue + tempFuncNormConstant;
+            }
+            return tempFuncNormConstant;
+            /*
+            //now we need to rescale all the values in the array
+            leftTail_1 += tempFuncNormConstant;
+            leftTail_2 += tempFuncNormConstant;
+            //special case
+            if (_H[0][0] == 0)
+            {
+                p[0] = _H[0][1] + tempFuncNormConstant;
+            }
+            //middle ones
+            for (int i = 1; i < _H.Count - 1; i++)
+            {
+                p[i] += tempFuncNormConstant;
+            }
+
+            //right tails
+            if (_H[_H.Count - 1][0] != 0)
+            {
+                rightTail_1 += tempFuncNormConstant;
+                rightTail_2 += tempFuncNormConstant;
+
+            }
+            else
+            {
+                p[_H.Count - 1] += tempFuncNormConstant;
+            }*/
+        }
 
         /// <summary>
         /// this is generate probablity for each piece based on exp( H function), also nomalized by the total probablity of the sum
@@ -939,27 +1070,35 @@ namespace AdaptiveRejectionSampling
             int indexBiggestLogTargetFunctionValue = 1;//we don't care about the first [0] and last [Count-1] values, since they are only for bound purpose, not having meaningful values for our purpose
             double biggestLogTargetFunctionValue = CP_EnvelopeFunctionOfLogTarget[indexBiggestLogTargetFunctionValue][1];
 
+            
+            //now we should be fine to do the job to get pdfs
             while (true)
             {
+                //added 20141224, get the new rescale constant
+                double tempFuncConstant = GetNormalizationConstantForGeneratePDFEnvFunc(_H, _S);
                 p = new List<double>(_H.Count);
                 //first, for the left tail, _h : ax+b, for exponential, this is exp(ax+b), where a >0, and x<-(-inf, s1)
                 //integration of this : f(exp(ax+b)dx) =>1/a*exp(ax+b)|[s1, -inf], f is the integral  ==>1/a*exp(a*s1-b)
                 if (_H[0][0] != 0)
                 {
-                    p.Add(1 / _H[0][0] * (Math.Exp(_H[0][0] * _S[1] + _H[0][1]) - Math.Exp(_H[0][0] * _S[0] + _H[0][1])));
+
+                    //double temp = _H[0][0] * _S[1] + _H[0][1];
+                    double temp2 = (Math.Exp(_H[0][0] * _S[1] + _H[0][1] + tempFuncConstant) - Math.Exp(_H[0][0] * _S[0] + _H[0][1] + tempFuncConstant));
+                    //p.Add(1 / _H[0][0] * temp*(Math.Exp(_H[0][0] * _S[1] + _H[0][1]) - Math.Exp(_H[0][0] * _S[0] + _H[0][1])));
+                    p.Add(1 / _H[0][0] *temp2 );
                 }
                 else
                 {
                     if (Double.IsInfinity(_S[0]))
                         throw new System.Exception("the envelope function has not been constructed correctly, the tail is a flat with a infinite lower bound");
-                    p.Add(Math.Exp(_H[0][1]) * (_S[1] - _S[0]));
+                    p.Add(Math.Exp(_H[0][1]+tempFuncConstant) * (_S[1] - _S[0]));
                 }
                 p_total = p[0];
 
                 //doing the middle ones, uniform in exp format
                 for (int i = 1; i < _H.Count - 1; i++)
                 {
-                    p.Add(Math.Exp(_H[i][1]) * (_S[i + 1] - _S[i]));
+                    p.Add(Math.Exp(_H[i][1]+tempFuncConstant) * (_S[i + 1] - _S[i]));
                     p_total += p[i];//the one just added, also could be p[p.count-1]
                     if (_H[i][1] > biggestLogTargetFunctionValue)
                     {
@@ -972,14 +1111,14 @@ namespace AdaptiveRejectionSampling
                 //this:  f(exp(ax+b)dx) =>1/a*exp(ax+b)|[+inf, Sn], f is the integral  ==>-1/a*exp(a*s1-b)
                 if (_H[_H.Count - 1][0] != 0)
                 {
-                    p.Add(1 / _H[_H.Count - 1][0] * (Math.Exp(_H[_H.Count - 1][0] * _S[_S.Count - 1] + _H[_H.Count - 1][1]) -
-                    Math.Exp(_H[_H.Count - 1][0] * _S[_S.Count - 2] + _H[_H.Count - 1][1])));
+                    p.Add(1 / _H[_H.Count - 1][0] * (Math.Exp(_H[_H.Count - 1][0] * _S[_S.Count - 1] + _H[_H.Count - 1][1]+tempFuncConstant ) -
+                    Math.Exp(_H[_H.Count - 1][0] * _S[_S.Count - 2] + _H[_H.Count - 1][1]+tempFuncConstant)));
                 }
                 else
                 {
                     if (Double.IsInfinity(_S[_S.Count - 1]))
                         throw new System.Exception("the envelope function has not been constructed correctly, the tail is a flat with a infinite upper bound");
-                    p.Add(Math.Exp(_H[_H.Count - 1][1]) * (_S[_S.Count - 1] - _S[_S.Count - 2]));
+                    p.Add(Math.Exp(_H[_H.Count - 1][1]+tempFuncConstant) * (_S[_S.Count - 1] - _S[_S.Count - 2]));
 
                 }
 
@@ -987,8 +1126,15 @@ namespace AdaptiveRejectionSampling
                 if (Double.IsInfinity(p_total))
                 {
                     this.C_FunctionNormConstant = 0;
+                    
                     //now we need to call to generate the support point array and envelope again
-                    this.GenerateSupportPoints(this.CP_SupportPoints.Count, this.CP_SupportPoints[0], this.CP_SupportPoints[this.CP_SupportPoints.Count - 1], this.CP_SupportPoints[indexBiggestLogTargetFunctionValue - 1], this.CP_SupportPoints[indexBiggestLogTargetFunctionValue]);
+                    //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    //on 2014-11-09, we changed this following calling of function, we don't limited the number of support point of the initial failed support point,
+                    //but instead of we use the default numberOfSupportpoint.
+                    Console.WriteLine("calling to regenerate the support point array again!!");
+                    this.GenerateSupportPoints(this.C_OriginalNumberOfSupportPoints, this.CP_SupportPoints[0], this.CP_SupportPoints[this.CP_SupportPoints.Count - 1], this.CP_SupportPoints[indexBiggestLogTargetFunctionValue - 1], this.CP_SupportPoints[indexBiggestLogTargetFunctionValue]);
+                    //this.GenerateSupportPoints(this.CP_SupportPoints.Count, this.CP_SupportPoints[0], this.CP_SupportPoints[this.CP_SupportPoints.Count - 1], this.CP_SupportPoints[indexBiggestLogTargetFunctionValue - 1], this.CP_SupportPoints[indexBiggestLogTargetFunctionValue]);
+                    
                     this.GenerateEnevelopeFunctionOfLogTarget();
                     _S = this.CP_SupportPoints;
                     _H = this.CP_EnvelopeFunctionOfLogTarget;
@@ -1233,7 +1379,7 @@ namespace AdaptiveRejectionSampling
         private double C_InitialValue0;
         private double C_InitialValue1;
         private double C_FunctionNormConstant = 0;
-       
+        private int C_OriginalNumberOfSupportPoints;
 
         //****************PROPERTIES******************
         //properties

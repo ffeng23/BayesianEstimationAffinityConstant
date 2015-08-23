@@ -12,7 +12,7 @@ namespace AccessoryLib
     public class AceessoryLib
     {
 #if FIX_SEED
-        public static Int32 SEED = 37677;//33919 -->3 round //9672; 6 round//35492 -->10round
+        public static Int32 SEED = 61438;//3943;//37677;//33919 -->3 round //9672; 6 round//35492 -->10round
 #else
         public static Int32 SEED=(int) DateTime.Now.Ticks & 0x0000FFFF;
 #endif

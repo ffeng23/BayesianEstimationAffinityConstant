@@ -61,11 +61,12 @@ namespace GibbsSampler
             {
                 distributions.Add(C_UpdateDistributionDelegate(this.CP_Initials,i));
             }*/
-            Console.WriteLine("initialize bayesisna samplings.........");
+            Console.WriteLine("initialize bayesisna sampling.........");
             List<double> current=this.CP_Initials;
             List<double> previous = new List<double>();//this one is used to remember the previous sample in order to be used for 1d search of nonzero for nelder mead method
             for (int i = 0; i < this.CP_Initials.Count; i++)
             {
+                
                 samples.Add(new List<double>(_numberOfSamples));
                 samples[i].Add(this.CP_Initials[i]);
                 double lower = this.C_Bounds[i][0] ;
@@ -90,8 +91,8 @@ namespace GibbsSampler
 
             Console.WriteLine("Start drawing samples..............");
             //run to generatate samples
-            StreamWriter writer = new StreamWriter("learReg.txt");
-            //writer.WriteLine("ka\tkb\tkM\tconc\tRmax\tR0\tVar");
+            StreamWriter writer = new StreamWriter("MCMCSamples.txt");
+            writer.WriteLine("ka\tkb\tconc\tRmax\tR0\tVar");
             int increPercent = 5;
             int runningPercent = 0;
             Console.Write("Progress:");
@@ -99,12 +100,20 @@ namespace GibbsSampler
             {
                 if (((double)i) / _numberOfSamples * 100 >= runningPercent)
                 {
-                    Console.Write("..." + runningPercent + "%(" + i + "/"+_numberOfSamples+")" );
+                    Console.Write("..." + runningPercent + "%(" + i + "/" + _numberOfSamples + ")");
+                    //Console.Write("..." + runningPercent + "%(" + i + "/" + _numberOfSamples + ")");
                     runningPercent += increPercent;
                 }
+                else
+                {
+                    Console.Write(".");
+                }
+                //Console.WriteLine("i:" + i + "$");
                 //for each different paramter, gerenate one sample from its target distribution
                 for (int j = 0; j < samples.Count; j++)
                 {
+                    //Console.Write("\tsub " + j + ".");
+ 
                     //Console.WriteLine("\tsub " + j + " steps; seed is "+AccessoryLib.AceessoryLib.SEED );
                     LogDistributionFuctionDelegate func = C_UpdateDistributionDelegate(current, j);
                     arms = new AdaptiveRejectionMetropolisSampling( previous[j],current[j], func, this.C_Bounds[j][0], this.C_Bounds[j][1]);

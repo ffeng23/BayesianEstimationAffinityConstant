@@ -57,5 +57,10 @@ namespace BayesianEstimateLib
                 
             }
         }
+
+        public override void setParameters(double[] _params)
+        {
+            throw new NotImplementedException("I am not done yet");
+        }
     }//end of class
 }

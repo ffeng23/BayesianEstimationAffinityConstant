@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Meta.Numerics, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67d25c65a6631347, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\GerminalCenterSim\ZonalDynamics\Meta.Numerics.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,7 +44,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ELISTATFitController.cs" />
+    <Compile Include="ELISTATModel.cs" />
+    <Compile Include="ELISTATQuadraticFitController.cs" />
+    <Compile Include="ELISTATQuadraticModel.cs" />
+    <Compile Include="FitController.cs" />
+    <Compile Include="Model.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuadraticFitController.cs" />
+    <Compile Include="QuadraticModel.cs" />
     <Compile Include="SprModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -51,6 +63,10 @@
     <ProjectReference Include="..\BayesianEstimateLib\BayesianEstimateLib.csproj">
       <Project>{BBE3F738-5A5C-42AF-98D9-A8656C866E36}</Project>
       <Name>BayesianEstimateLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GibbsSampler\GibbsSampler.csproj">
+      <Project>{65A3BFE0-49CA-466C-93F3-A2EB3BFB2CA3}</Project>
+      <Name>GibbsSampler</Name>
     </ProjectReference>
     <ProjectReference Include="..\NelderMeadMethod\NelderMeadMethod.csproj">
       <Project>{9BF5041D-EF8A-414E-9E10-6331D584AC96}</Project>

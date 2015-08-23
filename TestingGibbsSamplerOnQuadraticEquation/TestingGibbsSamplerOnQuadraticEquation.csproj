@@ -2,18 +2,20 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BBE3F738-5A5C-42AF-98D9-A8656C866E36}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{A3737106-55F2-4F8F-A35B-39C5F4E3C0D6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BayesianEstimateLib</RootNamespace>
-    <AssemblyName>BayesianEstimateLib</AssemblyName>
+    <RootNamespace>TestingGibbsSamplerOnQuadraticEquation</RootNamespace>
+    <AssemblyName>TestingGibbsSamplerOnQuadraticEquation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +24,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,9 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Meta.Numerics">
-      <HintPath>..\BayesianEstimationAffinityConstant\Meta.Numerics.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,26 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataIO.cs" />
-    <Compile Include="Langmuir.cs" />
-    <Compile Include="MassTransportCoefficient_kM.cs" />
-    <Compile Include="MassTransportModel.cs" />
-    <Compile Include="MCMC.cs" />
-    <Compile Include="MCMC_Gibbs.cs" />
-    <Compile Include="MCMC_MH.cs" />
-    <Compile Include="NumericalIntegrationOfDynamics.cs" />
+    <Compile Include="QuadraticEquationFitting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimulationSPR.cs" />
-    <Compile Include="TwoState.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AccessoryLib\AccessoryLib.csproj">
-      <Project>{BDB8DB62-528B-4F2D-8DB9-1ECACA8BFE0F}</Project>
-      <Name>AccessoryLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RungeKuttaMethod\RungeKuttaMethod.csproj">
-      <Project>{E25141A7-C066-4EA9-B6E8-56E78E706736}</Project>
-      <Name>RungeKuttaMethod</Name>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{D1BE4C1D-281C-43FE-A8A3-B83FCDDF6DA3}</Project>
+      <Name>Models</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -20,7 +20,7 @@ namespace BayesianEstimateLib
         /// 
         /// this assumes a fixed formation, it arranges the data in columns, first column is time data, then follows a variable number
         /// of data columns (RU columns). It has a head, but is skipped. the output is the a dictionary, keyed by integer, first one, key=0 
-        /// is the time, then the RUs, keyed by 1,2,.....
+        /// is the time, then the RUs, keyed by 1,2,...... this is the colunm number/index
         /// 
         /// </summary>
         /// <param name="fileName">string filename cotaining the diectory path</param>
@@ -193,6 +193,59 @@ namespace BayesianEstimateLib
             {
                 writer.WriteLine(lst1[i] + "\t" + lst2[i]);
             }
+            writer.Close();
+
+        }
+        /// <summary>
+        /// write the data to disk
+        /// </summary>
+        /// <param name="_Y">Y, dependent variable with only one variable allowed</param>
+        /// <param name="_Xs">X, independnt variabls, could be multi-dimension</param>
+        /// <param name="_filename">name of out put</param>
+        /// <param name="header">header vectors</param>
+        public static void WriteDataTable(List<double> _Y, List<List<double>> _Xs, string _filename, List<string> header)
+        {
+            StreamWriter writer = new StreamWriter(_filename);
+            //need to check the dimensions between data and header
+            if ((_Xs[0].Count + 1) != header.Count)
+            {
+                Console.WriteLine("*******ERROR******: the number of header and data colums don't equal. Please check!");
+                System.Environment.Exit(1);
+ 
+            }
+            if (_Xs.Count != _Y.Count)
+            {
+                Console.WriteLine("*******ERROR******: dependent and independent variables are of unequal size. Please check!");
+                System.Environment.Exit(1);
+ 
+            }
+            writer.Write(header[0] + "\t");
+            for (int i = 0; i < _Xs[0].Count; i++)
+            {
+                writer.Write(header[i + 1]);
+                if (i != _Xs[0].Count - 1)
+                    writer.Write("\t");
+            }
+            writer.Write("\n");
+            
+            //start writing the data
+
+            for (int i = 0; i < _Y.Count; i++)
+            {
+                writer.Write(_Y[i] + "\t");
+                for (int j = 0; j < _Xs[i].Count;j++)
+                {
+                    writer.Write(_Xs[i][j]);
+                    if (j != _Xs[i].Count - 1)
+                    {
+                        writer.Write("\t");
+                    }
+                    else
+                        writer.Write("\n");
+                }
+            }
+
+            //Done!!
             writer.Close();
 
         }

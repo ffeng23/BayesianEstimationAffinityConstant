@@ -17,6 +17,7 @@ using BayesianEstimateLib;
 using System.Windows.Forms;
 using Models;
 
+
 namespace BayesianEstimationAffinityConstant
 {
     /// <summary>
@@ -206,10 +207,39 @@ namespace BayesianEstimationAffinityConstant
                    , sprm.updateFunctionDistribution, bounds);
             //GibbsSampler.GibbsSampler gb = new GibbsSampler.GibbsSampler(new List<double> {1545903.57844479,	0.000322900628507969,	9.91536866021184E-09,	29.8920610679908,	29.5843847101981,	1.65389525923268}, sprm.updateFunctionDistribution, bounds);
             Console.WriteLine("now ready to run estimation........");
+            bool errorFlag = false;
             //List<List<double>> output = new List<List<double>>();
-            runResultData  = gb.Run(Convert.ToInt32(Tbx_TotalSteps.Text));
-            
-
+            try
+            {
+                runResultData = gb.Run(Convert.ToInt32(Tbx_TotalSteps.Text));
+            }
+            catch (AccessoryLib.InappropriateSupportArrayException exp)
+            {
+                LogTextBlock.Text += exp.Message + "\n";
+                System.Windows.MessageBox.Show("Error found! Please restart the program. sorry for the inconvenience!");
+                Console.WriteLine(exp.Message);
+                errorFlag = true;
+            }
+            catch (Exception exp)
+            {
+                LogTextBlock.Text += "*********Unknown error found! \tPlease restart the program. sorry for the inconvenience!\n";
+                LogTextBlock.Text += exp.Message + "\n";
+                System.Windows.MessageBox.Show("Unknown error found! Please restart the program. sorry for the inconvenience!");
+                Console.WriteLine("*********Unknown error found! \tPlease restart the program. sorry for the inconvenience!\n");
+                errorFlag = true ;
+            }
+            finally
+            {
+              
+            }
+            if (errorFlag)
+            {
+                BtnRunBayesian.IsEnabled = false;
+                Btn_AttachingFile.IsEnabled = false;
+                Btn_DetachingFile.IsEnabled = false;
+                btnRunSim.IsEnabled = false;
+                return;
+            }
             Console.WriteLine("writing the output file.......");
             StreamWriter writer = new StreamWriter("learReg.txt");
             //writer.WriteLine("ka\tkb\tkM\tconc\tRmax\tR0\tVar");
@@ -477,31 +507,31 @@ namespace BayesianEstimationAffinityConstant
             List<string> title = new List<string>(_outdata.Count) { "", "", "", "", "", "" }; //{ "ka", "kd", "conc", "Rmax", "R0", "Var" };
             List<string> xlab=new List<string>{"", "", "", "", "", ""};//{"ka", "kd", "conc", "Rmax", "R0", "Var"};
             List<string> ylab=new List<string>{"ka", "kd", "conc", "Rmax", "R0", "Var"};//{"", "", "", "", "", ""};
-            List<List<double>> burnInData = new List<List<double>>(xdata.Count);
+            List<List<double>> ydata = new List<List<double>>(xdata.Count);
 
             for (int i = 0; i < _outdata.Count; i++)
             {
                 List<double> xdata_x = new List<double>(_outdata[i].Count);
-                List<double> burnIndata_y = new List<double>();
+                List<double> ydata_y = new List<double>();
                 for (int j = 0; j < _outdata[i].Count; j++)
                 {
                     if (j >= burnInSteps)
                     {
                         xdata_x.Add(j + 1);
-                        burnIndata_y.Add(_outdata[i][j]);
+                        ydata_y.Add(_outdata[i][j]);
                     }
                 }
                 xdata.Add(xdata_x);
-                burnInData.Add(burnIndata_y);
+                ydata.Add(ydata_y);
                 
             }
 
-            if (burnInData[0].Count <= 1)
+            if (ydata[0].Count <= 1)
             {
                 return;
             }
-            chtManager.DrawTracePlots(xdata,_outdata, title, xlab, ylab,true );
-            printDistribution(burnInData);
+            chtManager.DrawTracePlots(xdata,ydata, title, xlab, ylab,true );
+            printDistribution(ydata);
 
         }
         private void printDistribution(List<List<double>> _data)

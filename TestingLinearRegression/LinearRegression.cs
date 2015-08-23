@@ -8,6 +8,12 @@ using NelderMeadMethod;
 
 namespace TestingLinearRegression
 {
+    /// <summary>
+    /// this is the class specify the mathmatical model for the equation we want to estimate the parameters based
+    /// on the data observed. Here, we need to specify paramters, the function to generate the "Y" value basedon the 
+    /// paramters and dependents. We also need to specify the updating function that could update the paramters basedon the
+    /// input, also return the log of Pdf for the specific paramters.
+    /// </summary>
     public class LinearRegression
     {
         public LinearRegression(double _slope, double _intercept, double _var)

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace BayesianEstimateLib
 {
+    /// <summary>
+    /// this is the class to calculate the kM based on MW and other constant for the analyte
+    /// </summary>
     public class MassTransportCoefficient_kM
     {
         //**************constant variable used for calculate diffusion coefficeint. we will need input of temperature and MW.

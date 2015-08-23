@@ -14,16 +14,18 @@ namespace BayesianEstimateLib
     
     public abstract class SimulationSPR
     {
-        const double EPSILON = 1E-10;
-        /* don't allow empty constructor in order to keep the integrity of data
+        public const double EPSILON = 1E-10;
+        public const double DefaultDeltaT = 0.001;
+        //* don't allow empty constructor in order to keep the integrity of data
         /// <summary>
-        /// empty constructer
+        /// empty constructer, protected in case of initialization
         /// </summary>
-        public simulationSPR()
+        protected SimulationSPR()
         {
             //empty constructer
+            this.DeltaT = DefaultDeltaT;
         }
-         * */
+        // * */
         /// <summary>
         /// the constructer with necessary parameters
         /// </summary>
@@ -46,7 +48,12 @@ namespace BayesianEstimateLib
             this._kM = _kM;
             this._deltaT = _deltaT;
             this.SSPR_r0 = _r0;
+
+            this._fillTimeArrays();
             
+        }
+        protected virtual void _fillTimeArrays()
+        {
             _time_attach = new List<double>();
             _time_detach = new List<double>();
             _ru_attach = new List<double>();
@@ -61,9 +68,67 @@ namespace BayesianEstimateLib
                 _time_detach.Add(i * _deltaT);
                 _ru_detach.Add(0);
             }
-        }
+            //make sure the bound was added to the array
+            if (_duration_attach - _time_attach[_time_attach.Count() - 1] > EPSILON || _duration_attach - _time_attach[_time_attach.Count() - 1] <-1* EPSILON)
+            {
+                //add this to it
+                _time_attach.Add(_duration_attach);
+            }
+            if (_duration_detach - _time_detach[_time_detach.Count() - 1] > EPSILON || _duration_detach - _time_detach[_time_detach.Count() - 1] <-1* EPSILON)
+            {
+                //add this to it
+                _time_detach.Add(_duration_detach);
+            }
 
-        public void setParameters(double _ka, double _kd, double _kM, double _conc, double _Rmax, double _r0
+        }
+        /// <summary>
+        /// set or resize the time array
+        /// </summary>
+        /// <param name="_ts">0-duration_attach, 1-duration_detach, 2-delta</param>
+        public void SetDurations(double[] _ts)
+        {
+            bool doUpdate = true;
+            switch (_ts.Count())
+            {
+                case 1:
+                    this._duration_attach = _ts[0];
+                    break;
+                case 2:
+                    this._duration_attach = _ts[0];
+                    this._duration_detach = _ts[1];
+                    break;
+                case 3:
+                    this._duration_attach = _ts[0];
+                    this._duration_detach = _ts[1];
+                    this._deltaT = _ts[2];
+                    break;
+                default:
+                    //do nothing;
+                    doUpdate = false;
+                    break;
+            }
+            if (doUpdate)
+            {
+                this._fillTimeArrays();
+            }
+        }
+        /// <summary>
+        /// remember, set parameter only for parameters ka, kd, conc, rmax, r0, km, but not the 
+        /// time/durations
+        /// </summary>
+        /// <param name="_params"></param>
+        public abstract void setParameters(double[] _params);
+        /// <summary>
+        /// this methods only set the parameters like ka, kd, km, conc, rmax, r0, but not the times.
+        /// times are not parameters, but variable.
+        /// </summary>
+        /// <param name="_ka"></param>
+        /// <param name="_kd"></param>
+        /// <param name="_kM"></param>
+        /// <param name="_conc"></param>
+        /// <param name="_Rmax"></param>
+        /// <param name="_r0"></param>
+        public virtual void setParameters(double _ka, double _kd, double _kM, double _conc, double _Rmax, double _r0
                                                   )
         {
             this._ka = _ka;
@@ -105,7 +170,7 @@ namespace BayesianEstimateLib
         /// a function used to add new values to the Time array
         /// </summary>
         /// <param name="_tVals">array of values to be added</param>
-        public void addValueSToTimeArr_attach(List<double> _tVals)
+        public virtual void addValueSToTimeArr_attach(List<double> _tVals)
         {/*
             for (int i = 0; i < _tVals.Count; i++)
             {
@@ -116,6 +181,10 @@ namespace BayesianEstimateLib
                 }
             }
           */
+            if (_time_attach == null )
+            {
+                throw new Exception("unitialized time array");
+            }
             _time_attach = MergeArrays(_time_attach, _tVals);
             //check the wether need to enlarge the ru_attach
             for (int i = _ru_attach.Count; i < _time_attach.Count(); i++)
@@ -127,8 +196,12 @@ namespace BayesianEstimateLib
 
         
 
-        public void addValueSToTimeArr_detach(List<double> _tVals)
+        public virtual void addValueSToTimeArr_detach(List<double> _tVals)
         {
+            if (_time_detach == null)
+            {
+                throw new Exception("unitialized time array");
+            }
             /*
             for (int i = 0; i < _tVals.Count; i++)
             {
@@ -180,7 +253,7 @@ namespace BayesianEstimateLib
             while (true)
             {   
                 //we need to check whether we are going ahead, 
-                if (indexAiming >= _tVals.Count || indexHolding > this._time_attach.Count)
+                if (indexAiming >= _tVals.Count || indexHolding >= this._time_attach.Count)
                     break;//for either one is finished,we are done
                 
                 if ((this._time_attach[indexHolding] - _tVals[indexAiming]) < EPSILON && (this._time_attach[indexHolding] - _tVals[indexAiming]) > -1 * EPSILON)
@@ -257,7 +330,7 @@ namespace BayesianEstimateLib
             while (true)
             {
                 //we need to check whether we are going ahead, 
-                if (indexAiming >= _tVals.Count || indexHolding > this._time_detach.Count)
+                if (indexAiming >= _tVals.Count || indexHolding >= this._time_detach.Count)
                     break;//for either one is finished,we are done
 
                 if ((this._time_detach[indexHolding] - _tVals[indexAiming]) < EPSILON && (this._time_detach[indexHolding] - _tVals[indexAiming]) > -1 * EPSILON)
@@ -340,6 +413,65 @@ namespace BayesianEstimateLib
 
             return ret;
         }
+
+        /// <summary>
+        /// the merge method to combine the two array into one, contains the union of the two array. this method assumes the two arrays are sorted in ascending order
+        /// </summary>
+        /// <param name="_a1">input array one</param>
+        /// <param name="_a2">input array two</param>
+        /// <returns>the return union array</returns>
+        public static double[] MergeArrays(double[] _a1,
+            double[] _a2)
+        {
+            double epsilon = 1E-10;
+            List<double> ret = new List<double>();
+            int a1_index = 0, a2_index = 0;
+            while (true)
+            {
+                if ((_a1[a1_index] - _a2[a2_index]) < epsilon && (_a1[a1_index] - _a2[a2_index]) > -1 * epsilon)
+                {
+                    //two values equal
+                    //then we get any of it and also move forward for both
+                    ret.Add(_a1[a1_index]);
+                    a1_index++;
+                    a2_index++;
+                }
+                else //not equal, we need to add the smaller one and move forward.
+                {
+                    if (_a1[a1_index] > _a2[a2_index])
+                    {
+                        ret.Add(_a2[a2_index]);
+                        a2_index++;
+                    }
+                    else
+                    {
+                        ret.Add(_a1[a1_index]);
+                        a1_index++;
+                    }
+                }
+
+                //now we need to check wether a1 or a2 has been finished.
+                if (a1_index >= _a1.Count() || a2_index >= _a2.Count())
+                {
+                    break;
+                }
+            }//end of while
+
+            //now we need to copy over the left over for one array.
+            for (; a1_index < _a1.Count(); a1_index++)
+            {
+                ret.Add(_a1[a1_index]);
+            }
+            for (; a2_index < _a2.Count(); a2_index++)
+            {
+                ret.Add(_a2[a2_index]);
+            }
+
+            //now put thing into an arrray
+
+            return ret.ToArray();
+        }
+
         //members
         //check the definition for these paramter in the constructor definition above
         protected double _ka;
