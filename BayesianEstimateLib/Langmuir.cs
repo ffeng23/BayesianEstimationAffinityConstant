@@ -5,6 +5,9 @@ using System.Text;
 
 namespace BayesianEstimateLib
 {
+    /// <summary>
+    /// this is the Langumir model with analytical solution derived from SimulationSPR.
+    /// </summary>
     public sealed class Langmuir:SimulationSPR 
     {
         public Langmuir(double _ka, double _kd, double _conc, double _Rmax, double _r0,

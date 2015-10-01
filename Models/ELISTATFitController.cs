@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BayesianEstimateLib;
+
+using AccessoryLib;
 namespace Models
 {
     public class ELISTATFitController:FitController 

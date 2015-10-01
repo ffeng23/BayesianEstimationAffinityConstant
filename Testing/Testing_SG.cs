@@ -6,6 +6,7 @@ using System.Numerics;
 using Savitzky_GolaySmoothingLib;
 using BayesianEstimateLib;
 
+using AccessoryLib;
 namespace Testing
 {
     class Testing_SG

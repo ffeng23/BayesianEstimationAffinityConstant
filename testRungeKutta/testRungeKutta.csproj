@@ -34,6 +34,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AccessoryLib">
+      <HintPath>..\..\..\FengLib\AccessoryLib\bin\Debug\AccessoryLib.dll</HintPath>
+    </Reference>
+    <Reference Include="RungeKuttaMethod">
+      <HintPath>..\..\..\FengLib\RungeKuttaMethod\bin\Debug\RungeKuttaMethod.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,10 +56,6 @@
     <ProjectReference Include="..\BayesianEstimateLib\BayesianEstimateLib.csproj">
       <Project>{BBE3F738-5A5C-42AF-98D9-A8656C866E36}</Project>
       <Name>BayesianEstimateLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RungeKuttaMethod\RungeKuttaMethod.csproj">
-      <Project>{E25141A7-C066-4EA9-B6E8-56E78E706736}</Project>
-      <Name>RungeKuttaMethod</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

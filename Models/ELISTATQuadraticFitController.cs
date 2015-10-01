@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using BayesianEstimateLib;
 
+using AccessoryLib;
+
 namespace Models
 {
     public class ELISTATQuadraticFitController:FitController

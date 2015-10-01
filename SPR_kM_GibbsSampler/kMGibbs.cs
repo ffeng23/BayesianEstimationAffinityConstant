@@ -5,6 +5,8 @@ using System.Text;
 using System.IO;
 using NelderMeadMethod;
 
+using AccessoryLib;
+
 namespace SPR_kM_GibbsSampler
 {
     /// <summary>
@@ -77,12 +79,12 @@ namespace SPR_kM_GibbsSampler
             
                 //we need to read in the input
                 Console.WriteLine("reading \"" + fileAttach[i] + "\"........");
-                inputDataShort = BayesianEstimateLib.DataIO.ReadDataTable(fileAttach[i], true, '\t', 0);
+                inputDataShort = DataIO.ReadDataTable(fileAttach[i], true, '\t', 0);
                 shortT_A.Add(inputDataShort["time"]);
                 shortR_A.Add(inputDataShort["RU"]);
             
                 Console.WriteLine("reading \"" + fileDetach[i] + "\"........");
-                inputDataShort = BayesianEstimateLib.DataIO.ReadDataTable(fileDetach[i] , true, '\t', 0);
+                inputDataShort = DataIO.ReadDataTable(fileDetach[i] , true, '\t', 0);
                 shortT_D.Add(inputDataShort["time"]);
                 shortR_D.Add( inputDataShort["RU"]);
                 

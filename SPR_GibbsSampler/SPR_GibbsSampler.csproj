@@ -38,6 +38,12 @@
     </StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AccessoryLib">
+      <HintPath>..\..\..\FengLib\AccessoryLib\bin\Debug\AccessoryLib.dll</HintPath>
+    </Reference>
+    <Reference Include="NelderMeadMethod">
+      <HintPath>..\..\..\FengLib\NelderMeadMethod\bin\Debug\NelderMeadMethod.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,10 +72,6 @@
     <ProjectReference Include="..\Models\Models.csproj">
       <Project>{D1BE4C1D-281C-43FE-A8A3-B83FCDDF6DA3}</Project>
       <Name>Models</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NelderMeadMethod\NelderMeadMethod.csproj">
-      <Project>{9BF5041D-EF8A-414E-9E10-6331D584AC96}</Project>
-      <Name>NelderMeadMethod</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -17,6 +17,7 @@ using BayesianEstimateLib;
 using System.Windows.Forms;
 using Models;
 
+using AccessoryLib;
 
 namespace BayesianEstimationAffinityConstant
 {
@@ -156,12 +157,12 @@ namespace BayesianEstimationAffinityConstant
             fileAttach = Tbx_AttachDataFile.Text ;
             fileDetach = Tbx_DetachDataFile.Text;
             //we need to read in the input
-            Dictionary<string, List<double>> inputDataShort = BayesianEstimateLib.DataIO.ReadDataTable(fileAttach, true, '\t', 0);
+            Dictionary<string, List<double>> inputDataShort = DataIO.ReadDataTable(fileAttach, true, '\t', 0);
             List<double> shortT_A = inputDataShort["time"];
             List<double> shortR_A = inputDataShort["RU"];
             
             //Console.WriteLine("reading \"" + args[1] + "\"........");
-            inputDataShort = BayesianEstimateLib.DataIO.ReadDataTable(fileDetach, true, '\t', 0);
+            inputDataShort = DataIO.ReadDataTable(fileDetach, true, '\t', 0);
             List<double> shortT_D = inputDataShort["time"];
             List<double> shortR_D = inputDataShort["RU"];
             Console.WriteLine("Done");
@@ -213,7 +214,7 @@ namespace BayesianEstimationAffinityConstant
             {
                 runResultData = gb.Run(Convert.ToInt32(Tbx_TotalSteps.Text));
             }
-            catch (AccessoryLib.InappropriateSupportArrayException exp)
+            catch (AdaptiveRejectionSampling.InappropriateSupportArrayException exp)
             {
                 LogTextBlock.Text += exp.Message + "\n";
                 System.Windows.MessageBox.Show("Error found! Please restart the program. sorry for the inconvenience!");

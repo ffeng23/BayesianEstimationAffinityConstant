@@ -5,6 +5,9 @@ using System.Text;
 using NelderMeadMethod;
 using BayesianEstimateLib;
 
+using AccessoryLib;
+using System.Numerics;
+
 namespace testingNelderMead1D
 {
     //public delegate double LogDistributionFuctionDelegate(double x, double functionNormConstant);
@@ -36,6 +39,20 @@ namespace testingNelderMead1D
 
             //testing the conditionals
             Console.WriteLine("start testing nelder mead algorithm..........");
+
+            //testing the solve cubic equation
+            bool realRoot = false;
+            List<Complex> roots=AccessoryLib.AccessoryLib.SolveCubic(1,-6, 11, -6, out realRoot );
+            if (realRoot)
+            {
+                Console.WriteLine("there are real number roots");
+            }
+            foreach (Complex c in roots)
+            {
+                Console.WriteLine(c.ToString());
+            }
+            Console.WriteLine("done, hit enter to quit");
+            Console.ReadLine();
 
         }
 

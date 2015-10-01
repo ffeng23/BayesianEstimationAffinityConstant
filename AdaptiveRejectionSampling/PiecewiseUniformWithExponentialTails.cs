@@ -118,7 +118,7 @@ namespace AdaptiveRejectionSampling
                     {
                         //most likely we are trying too desperately for searching the support array bounds,
                         //we might want to jump out
-                        throw new AccessoryLib.InappropriateSupportArrayException("Error in partioning the support array for Gibbs sampling, please restart the application and specify the correct bounds and initial values for the parameter!!");
+                        throw new InappropriateSupportArrayException("Error in partioning the support array for Gibbs sampling, please restart the application and specify the correct bounds and initial values for the parameter!!");
                     }
                     loopCount++;
 

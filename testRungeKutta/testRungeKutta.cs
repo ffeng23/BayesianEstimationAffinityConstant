@@ -5,12 +5,15 @@ using System.Text;
 using RungeKuttaMethod;
 using System.IO;
 using BayesianEstimateLib;
+using AccessoryLib;
 namespace testRungeKutta
 {
     class testRungeKutta
     {
         static void Main(string[] args)
         {
+
+            Console.WriteLine("Start doing test........");
             //RungeKutta rk = new RungeKutta();
             int count=1000;
             List<double> input=new List<double>(count);
@@ -21,17 +24,17 @@ namespace testRungeKutta
             }
             List<double> output=RungeKutta.Solution(Quadratic_Derivatives, new List<double>{input[0], input[input.Count-1]}, step, 2.0);
 
-            BayesianEstimateLib.DataIO.WriteDataTable(input, output,"rungeKutta_der.txt",new List<string>{"x", "y"});
+            DataIO.WriteDataTable(input, output,"rungeKutta_der.txt",new List<string>{"x", "y"});
 
             List<double> outputOrig = new List<double>();
             for (int i = 0; i < count; i++)
             {
                 outputOrig.Add(Quadratic(input[i], input[i]));
             }
-            BayesianEstimateLib.DataIO.WriteDataTable(input, outputOrig, "rungeKutta_ori.txt", new List<string> { "x", "y" });
+            DataIO.WriteDataTable(input, outputOrig, "rungeKutta_ori.txt", new List<string> { "x", "y" });
 
             List<double> eul = Euler(new List<double> { input[0], input[input.Count - 1] }, 2.0, step);
-            BayesianEstimateLib.DataIO.WriteDataTable(input, eul, "Euler.txt", new List<string> { "x", "y" });
+            DataIO.WriteDataTable(input, eul, "Euler.txt", new List<string> { "x", "y" });
 
             //***********testing new function and with the two different implementation of RK4
             count = 100;
@@ -43,18 +46,18 @@ namespace testRungeKutta
             }
             List<double> outputNew = RungeKutta.Solution(Function_Derivatives, new List<double> { input[0], input[input.Count - 1] }, step, 0.5);
 
-            BayesianEstimateLib.DataIO.WriteDataTable(inputNew, outputNew, "rungeKutta_derNew.txt", new List<string> { "x", "y" });
+            DataIO.WriteDataTable(inputNew, outputNew, "rungeKutta_derNew.txt", new List<string> { "x", "y" });
 
             outputNew = RungeKutta.SolutionH(Function_Derivatives, new List<double> { input[0], input[input.Count - 1] }, step, 0.5);
 
-            BayesianEstimateLib.DataIO.WriteDataTable(inputNew, outputNew, "rungeKutta_derNewH.txt", new List<string> { "x", "y" });
+            DataIO.WriteDataTable(inputNew, outputNew, "rungeKutta_derNewH.txt", new List<string> { "x", "y" });
 
             outputOrig = new List<double>();
             for (int i = 0; i < count; i++)
             {
                 outputOrig.Add(functionOrig (inputNew[i]));
             }
-            BayesianEstimateLib.DataIO.WriteDataTable(inputNew, outputOrig, "rungeKutta_oriNew.txt", new List<string> { "x", "y" });
+            DataIO.WriteDataTable(inputNew, outputOrig, "rungeKutta_oriNew.txt", new List<string> { "x", "y" });
 
             //*************
             //now we are testing the spr data, and compare the result between the runge kutta and the langmuir model ones
@@ -103,6 +106,24 @@ namespace testRungeKutta
             DataIO.WriteDataTable(lid.Time_Attach, lid.RU_Attach, "simulation_attachLG.txt", header);
             DataIO.WriteDataTable(lid.Time_Detach, lid.RU_Detach, "simulation_detachLG.txt", header);
             Console.WriteLine("Done..................");
+
+            //testing two state SPR model with Euler and RK4
+            TwoState ts = new TwoState();
+            _ka = 1E6; _kd = 0.005;
+            double _ka2 = 0.003, _kd2=0.002;
+            _conc = 1E-7; _Rmax = 42;
+            ts.setParameters(new double[] { _ka, _kd, _ka2, _kd2, _conc, _Rmax,-1,-1,1000,1000,1 });
+            Console.WriteLine("Doing two state with Euler scheme..............");
+            ts.run_Attach_RK();
+            ts.run_Detach_RK();
+            DataIO.WriteDataTable(ts.Time_Attach, ts.RU_Attach, "simulation_TwoState_attach_Euler.txt", header);
+            DataIO.WriteDataTable(ts.Time_Attach, ts.RU_Detach, "simulation_TwoState_detach_Euler.txt", header);
+
+            //ts.setParameters(new double[] { _ka, _kd, _ka2, _kd2, _conc, _Rmax, -1, -1, 1000, 1000, 0.01 });
+
+            Console.WriteLine("Done.............");
+            Console.WriteLine("please type Enter to exit.........");
+            Console.ReadLine();
         }
         static double Quadratic_Derivatives(double _x, double _y)
         {

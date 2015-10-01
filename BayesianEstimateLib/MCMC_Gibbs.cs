@@ -221,4 +221,5 @@ namespace BayesianEstimateLib
         }//end of MCMCStep()
 
     }//end of class
+
 }

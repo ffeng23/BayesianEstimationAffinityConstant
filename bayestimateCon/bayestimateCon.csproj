@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Savitzky-GolaySmoothingLib">
+      <HintPath>..\..\..\FengLib\Savitzky-GolaySmoothingLib\bin\Debug\Savitzky-GolaySmoothingLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,10 +53,6 @@
     <ProjectReference Include="..\BayesianEstimateLib\BayesianEstimateLib.csproj">
       <Project>{BBE3F738-5A5C-42AF-98D9-A8656C866E36}</Project>
       <Name>BayesianEstimateLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Savitzky-GolaySmoothingLib\Savitzky-GolaySmoothingLib.csproj">
-      <Project>{F0765022-22A3-4051-BB7D-042A3F1A64B4}</Project>
-      <Name>Savitzky-GolaySmoothingLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

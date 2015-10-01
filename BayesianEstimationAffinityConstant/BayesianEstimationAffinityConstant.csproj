@@ -39,10 +39,16 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AccessoryLib">
+      <HintPath>..\..\..\FengLib\AccessoryLib\bin\Debug\AccessoryLib.dll</HintPath>
+    </Reference>
     <Reference Include="ActiproSoftware.Ribbon.Wpf351, Version=11.1.542.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9" />
     <Reference Include="ActiproSoftware.Shared.Wpf351, Version=11.1.542.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9" />
     <Reference Include="Meta.Numerics">
       <HintPath>.\Meta.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="NelderMeadMethod">
+      <HintPath>..\..\..\FengLib\NelderMeadMethod\bin\Debug\NelderMeadMethod.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -108,10 +114,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AccessoryLib\AccessoryLib.csproj">
-      <Project>{BDB8DB62-528B-4F2D-8DB9-1ECACA8BFE0F}</Project>
-      <Name>AccessoryLib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AdaptiveRejectionSampling\AdaptiveRejectionSampling.csproj">
       <Project>{9E41A974-D5D3-4153-8D82-8A4E3D84ED68}</Project>
       <Name>AdaptiveRejectionSampling</Name>
@@ -127,10 +129,6 @@
     <ProjectReference Include="..\Models\Models.csproj">
       <Project>{D1BE4C1D-281C-43FE-A8A3-B83FCDDF6DA3}</Project>
       <Name>Models</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NelderMeadMethod\NelderMeadMethod.csproj">
-      <Project>{9BF5041D-EF8A-414E-9E10-6331D584AC96}</Project>
-      <Name>NelderMeadMethod</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -34,8 +34,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AccessoryLib">
+      <HintPath>..\..\..\FengLib\AccessoryLib\bin\Debug\AccessoryLib.dll</HintPath>
+    </Reference>
     <Reference Include="Meta.Numerics">
       <HintPath>..\AdaptiveRejectionSampling\Meta.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="NelderMeadMethod">
+      <HintPath>..\..\..\FengLib\NelderMeadMethod\bin\Debug\NelderMeadMethod.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,10 +57,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AccessoryLib\AccessoryLib.csproj">
-      <Project>{BDB8DB62-528B-4F2D-8DB9-1ECACA8BFE0F}</Project>
-      <Name>AccessoryLib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AdaptiveRejectionSampling\AdaptiveRejectionSampling.csproj">
       <Project>{9E41A974-D5D3-4153-8D82-8A4E3D84ED68}</Project>
       <Name>AdaptiveRejectionSampling</Name>
@@ -66,10 +68,6 @@
     <ProjectReference Include="..\GibbsSampler\GibbsSampler.csproj">
       <Project>{65A3BFE0-49CA-466C-93F3-A2EB3BFB2CA3}</Project>
       <Name>GibbsSampler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NelderMeadMethod\NelderMeadMethod.csproj">
-      <Project>{9BF5041D-EF8A-414E-9E10-6331D584AC96}</Project>
-      <Name>NelderMeadMethod</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

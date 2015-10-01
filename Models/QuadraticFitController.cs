@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BayesianEstimateLib;
-
+using AccessoryLib;
 namespace Models
 {
+    /// <summary>
+    /// this is the fit controller to call to do the simple quadratic equation fitting for testing purposes.
+    /// </summary>
     public class QuadraticFitController:FitController
     {
         public QuadraticFitController()

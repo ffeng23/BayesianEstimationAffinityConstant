@@ -7,7 +7,7 @@ using System.Text;
 using Meta.Numerics;
 using Meta.Numerics.Statistics;
 using Meta.Numerics.Statistics.Distributions;
-using AccessoryLib;
+//using AccessoryLib;
 
 namespace BayesianEstimateLib
 {
@@ -16,6 +16,7 @@ namespace BayesianEstimateLib
     {
         public const double EPSILON = 1E-10;
         public const double DefaultDeltaT = 0.001;
+        public const double DefaultDeltaT_RK4 = 0.1;
         //* don't allow empty constructor in order to keep the integrity of data
         /// <summary>
         /// empty constructer, protected in case of initialization
@@ -73,11 +74,13 @@ namespace BayesianEstimateLib
             {
                 //add this to it
                 _time_attach.Add(_duration_attach);
+                _ru_attach.Add(0);
             }
             if (_duration_detach - _time_detach[_time_detach.Count() - 1] > EPSILON || _duration_detach - _time_detach[_time_detach.Count() - 1] <-1* EPSILON)
             {
                 //add this to it
                 _time_detach.Add(_duration_detach);
+                _ru_detach.Add(0);
             }
 
         }
@@ -146,7 +149,7 @@ namespace BayesianEstimateLib
         {
             NormalDistribution normGenerateor = new NormalDistribution(0, _sigma);
             
-            Random rng = new Random(AccessoryLib.AceessoryLib.SEED);
+            Random rng = new Random(AccessoryLib.AccessoryLib.SEED);
 
             
             for (int i = 0; i < _ru_attach.Count; i++)

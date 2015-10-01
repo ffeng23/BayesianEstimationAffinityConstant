@@ -13,8 +13,13 @@ namespace BayesianEstimateLib
     /// 
     /// SSPR_r0 is for starting RU for AB (stable form) and R0_AB_Star are for the
     /// transition form.
+    /// 
+    /// this model is the basic induced model. it contains kM inherited from
+    /// base class, but it has no mass transport.
+    /// it has no offset for R0.need to do this later
+    /// 
     /// </summary>
-    public class TwoState:SimulationSPR 
+    public class InducedFit:SimulationSPR 
     {
         
 
@@ -43,7 +48,7 @@ namespace BayesianEstimateLib
             _dt = -1;
             //do the 
         }*/
-        public TwoState()
+        public InducedFit()
             : base()
         {
             //empty constructor with unspecified parameters
@@ -72,7 +77,7 @@ namespace BayesianEstimateLib
         ///     the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2, 4-conc, 5-Rmax, 6-R0_AB,
         ///     7-R0_AB_Star
         ///     8-attachDuration, 9-detachDuration,11-deltaT</param>
-        public TwoState(double[] _params):base()
+        public InducedFit(double[] _params):base()
         {
             //check for the validity for the input
             if (_params.Count() < 10)
@@ -151,7 +156,88 @@ namespace BayesianEstimateLib
             }
         
         }
-        public override void run_Detach()
+        public  void run_Attach_RK()//this is the Runge-Kutta
+        {
+            //check for the validity of input
+            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _conc < 0 || _Rmax < 0)
+            {
+                throw new Exception("unitialized parameters");
+            }
+            if (this._time_attach == null || this._time_detach == null)
+            {
+                throw new Exception("unitialized time arrays");
+            }
+
+            //start building the numerical integration
+            //_ru.Add(0);the _ru_attach has been initialized and added with all zeros in the base class.
+            _R_AB_Att[0] = 0;
+            _R_AB_Star_Att[0] = 0;
+            _ru_attach[0] = _R_AB_Star_Att[0] + _R_AB_Att[0];
+            List<List<double>> RABs = new List<List<double>>();
+            //initialize the holder array for RABs
+            for (int i = 0; i < _R_AB_Att.Count(); i++)
+            {
+                RABs.Add(new List<double>{_R_AB_Star_Att[i],_R_AB_Att[i]});
+            }
+            
+            //double dR_AB_Star_per_dt;
+            //double dR_AB_per_dt;
+            //double dt;
+            /*for (int i = 0; ; i++)
+            {
+
+                dR_AB_Star_per_dt = _ka * _conc * (_Rmax - this._R_AB_Att[i] - this._R_AB_Star_Att[i])
+                                        - _kd * _R_AB_Star_Att[i] + _kd2 * _R_AB_Att[i] - _ka2 * _R_AB_Star_Att[i];
+                dR_AB_per_dt = _ka2 * _R_AB_Star_Att[i] - _kd2 * _R_AB_Att[i];
+
+                //double deltaR = kf*_conc*(_Rmax-_ru_attach[i])-kr*_ru_attach[i];
+                if (i >= _ru_attach.Count - 1)
+                {
+                    break;
+
+                }
+                dt = this._time_attach[i + 1] - this._time_attach[i];
+                _R_AB_Att[i + 1] = dR_AB_per_dt * dt + _R_AB_Att[i];
+                _R_AB_Star_Att[i + 1] = dR_AB_Star_per_dt * dt + _R_AB_Star_Att[i];
+                _ru_attach[i + 1] = _R_AB_Att[i + 1] + _R_AB_Star_Att[i + 1];
+            }*/
+            //RUN runge-kutta 4th order.
+            RungeKuttaMethod.RungeKutta.Solution(this.Derivative_Attach, this._time_attach, ref RABs);
+
+            //now let's unpack the output
+            for (int i = 1; i < RABs.Count; i++)
+            {
+                this._R_AB_Att[i] = RABs[i][1];
+                this._R_AB_Star_Att[i] = RABs[i][0];
+                this._ru_attach[i] = _R_AB_Att[i] + _R_AB_Star_Att[i];
+            }
+            //done
+        }
+
+
+        /// <summary>
+        /// this is the derivative function or the function for differential equation 
+        /// to do the RK or regular 
+        /// </summary>
+        /// <param name="_t"></param>
+        /// <param name="_RABs"></param>
+        /// <returns></returns>
+        protected List<double> Derivative_Attach(double _t, List<double> _RABs)
+        {
+            List<double> nextRABs = new List<double>();
+            
+            //in this _RABs, 0 is for R_AB_Star and 1 is for R_AB
+            double dR_AB_Star_per_dt = _ka * _conc * (_Rmax - _RABs[1] - _RABs[0])
+                                        - _kd * _RABs[0] + _kd2 * _RABs[1] - _ka2 * _RABs[0];
+            double dR_AB_per_dt = _ka2 * _RABs[0] - _kd2 * _RABs[1];
+
+            nextRABs.Add(dR_AB_Star_per_dt);
+            nextRABs.Add(dR_AB_per_dt);
+
+            return nextRABs;
+        }
+
+        public override void run_Detach() //Euler scheme
         {
             //check for the validity of input
             if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _conc < 0 || _Rmax < 0)
@@ -203,14 +289,109 @@ namespace BayesianEstimateLib
             //done!!
         }
 
+        public void run_Detach_RK() //Runge-Kutta scheme
+        {
+            //check for the validity of input
+            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _conc < 0 || _Rmax < 0)
+            {
+                throw new Exception("unitialized parameters");
+            }
+            if (this._time_attach == null || this._time_detach == null)
+            {
+                throw new Exception("unitialized time arrays");
+            }
+
+            //in this one, it is abit tricky, we need to figure out what to do with R0
+            if (SSPR_r0 < 0 && _R0_AB_Star < 0)
+            {
+                this._R_AB_Det[0] = _R_AB_Att[_R_AB_Att.Count() - 1];
+                this._R_AB_Star_Det[0] = _R_AB_Star_Att[_R_AB_Star_Att.Count() - 1];
+            }
+            else
+            {
+                this._R_AB_Det[0] = this.SSPR_r0;
+                this._R_AB_Star_Det[0] = this._R0_AB_Star;
+            }
+
+            _ru_detach[0] = _R_AB_Det[0] + _R_AB_Star_Det[0];
+
+            List<List<double>> RABs = new List<List<double>>();
+            for (int i = 0; i < _R_AB_Det.Count(); i++)
+            {
+                RABs.Add(new List<double> { _R_AB_Star_Det[i], _R_AB_Det[i] });
+            }
+            /*
+            //now doing the calculation
+            double dR_AB_Star_per_dt;
+            double dR_AB_per_dt;
+            double dt;
+            //double conc0 = 0;
+            for (int i = 0; ; i++)
+            {
+
+                dR_AB_Star_per_dt = //_ka * 0 * (_Rmax - this._R_AB_Det[i] - this._R_AB_Star_Det[i])
+                                        -1 * _kd * _R_AB_Star_Det[i] + _kd2 * _R_AB_Det[i] - _ka2 * _R_AB_Star_Det[i];
+                dR_AB_per_dt = _ka2 * _R_AB_Star_Det[i] - _kd2 * _R_AB_Det[i];
+
+                //double deltaR = kf*_conc*(_Rmax-_ru_attach[i])-kr*_ru_attach[i];
+                if (i >= _ru_detach.Count - 1)
+                {
+                    break;
+
+                }
+                dt = this._time_detach[i + 1] - this._time_detach[i];
+                _R_AB_Det[i + 1] = dR_AB_per_dt * _deltaT + _R_AB_Det[i];
+                _R_AB_Star_Det[i + 1] = dR_AB_Star_per_dt * _deltaT + _R_AB_Star_Det[i];
+                _ru_detach[i + 1] = _R_AB_Det[i + 1] + _R_AB_Star_Det[i + 1];
+            }
+             * */
+            //doing the Runge-kutta
+            RungeKuttaMethod.RungeKutta.Solution(this.Derivative_Detach, this._time_detach, ref RABs);
+
+            //now let's unpack the output
+            for (int i = 1; i < RABs.Count; i++)
+            {
+                this._R_AB_Det[i] = RABs[i][1];
+                this._R_AB_Star_Det[i] = RABs[i][0];
+                this._ru_detach[i] = _R_AB_Det[i] + _R_AB_Star_Det[i];
+            }
+            //done!!
+        }
+
+        protected List<double> Derivative_Detach(double _t, List<double> _RABs)
+        {
+            List<double> nextRABs = new List<double>();
+
+            //in this _RABs, 0 is for R_AB_Star and 1 is for R_AB
+            double dR_AB_Star_per_dt = 0 //_ka * _conc * (_Rmax - _RABs[1] - _RABs[0])
+                                        - _kd * _RABs[0] + _kd2 * _RABs[1] - _ka2 * _RABs[0];
+            double dR_AB_per_dt = _ka2 * _RABs[0] - _kd2 * _RABs[1];
+
+            nextRABs.Add(dR_AB_Star_per_dt);
+            nextRABs.Add(dR_AB_per_dt);
+
+            return nextRABs;
+        }
+
         /// <summary>
-        /// now set the parameters!!!, only for parameters, not for duration, time, deltaT
+        /// now set the parameters!!!, not only for parameters, for duration, time, deltaT too.
         /// there are two different way to do the calculation depending on R0.
         /// if we want to do the simulation, do we would not worry about R0, 
         /// let the system to take values from end of the association phase
         /// otherwise we will need to fit it as parameters. if we don't fit it
         /// we will put in negative values to indicate the system to take values
         /// from association phase end.
+        /// Normally, the R0s (such as R0_AB(*)) is carried over from attaching phase.
+        /// 
+        /// But for the real experiment, there are phase shift, we could get different value by the offset model.
+        /// 
+        /// it has the order, the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2,
+        /// 4-conc, 5-Rmax, 6-R0_AB,
+        ///     7-R0_AB_Star, 8-association duration, 9-association duration, 10-deltaT
+        ///     So far DON"T have kM in there now.
+        ///     here we also allow variable length of params, but only
+        ///     allow default value of deltaT, duration of association or detach.
+        ///     
         /// </summary>
         /// <param name="_params">it has the order, the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2,
         /// 4-conc, 5-Rmax, 6-R0_AB,
@@ -224,7 +405,9 @@ namespace BayesianEstimateLib
         public override void setParameters(double[] _params)
         {
             //here we allow variable length
-            if (_params.Count() < 8)
+            if (_params.Count() < 8) //8 parameters are the minimum for repeated calling of established object
+                        //in this case, we don't have to repeat the filling time arrays etc.
+                //probability 6 is the minimum, but we do this 8 for now.
             {
                 throw new Exception("the input parameter array is not valid. doesn't contain enough elements");
             }
@@ -260,7 +443,8 @@ namespace BayesianEstimateLib
             }
         }
         /// <summary>
-        /// override the original one in the base class, but leave this one unavailable
+        /// NOT implemented in this class
+        /// override the original one in the base class, but leave this one UNAVAILABLE in this two state model;
         /// </summary>
         /// <param name="_ka"></param>
         /// <param name="_kd"></param>

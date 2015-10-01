@@ -39,13 +39,13 @@ namespace BayesianEstimateLib
 
 
             zRand = new NormalDistribution();
-            rng = new Random(AccessoryLib.AceessoryLib.SEED);
+            rng = new Random(AccessoryLib.AccessoryLib.SEED);
 
             uRand = new UniformDistribution();
-            rng2 = new Random(AccessoryLib.AceessoryLib.SEED+1);
+            rng2 = new Random(AccessoryLib.AccessoryLib.SEED+1);
 
             uRand2 = new UniformDistribution();
-            rng3 = new Random(AccessoryLib.AceessoryLib.SEED+2);
+            rng3 = new Random(AccessoryLib.AccessoryLib.SEED+2);
 
             //initialize the values
             _deltaT = 0.01;

@@ -9,6 +9,7 @@ using System.IO;
 using NelderMeadMethod;
 using Models;
 
+using AccessoryLib;
 namespace SPR_GibbsSampler
 {
     class SPRGibbs
@@ -137,7 +138,7 @@ namespace SPR_GibbsSampler
                 fileAttach=args[0];
             }
                 //we need to read in the input
-                inputDataShort = BayesianEstimateLib.DataIO.ReadDataTable(fileAttach, true, '\t', 0);
+                inputDataShort = DataIO.ReadDataTable(fileAttach, true, '\t', 0);
                 shortT_A = inputDataShort["time"];
                 shortR_A = inputDataShort["RU"];
             if (args.Count() == 2)
@@ -147,7 +148,7 @@ namespace SPR_GibbsSampler
                 fileDetach=args[1];
             }
                 //Console.WriteLine("reading \"" + args[1] + "\"........");
-                inputDataShort = BayesianEstimateLib.DataIO.ReadDataTable(fileDetach , true, '\t', 0);
+                inputDataShort = DataIO.ReadDataTable(fileDetach , true, '\t', 0);
                 shortT_D = inputDataShort["time"];
                 shortR_D = inputDataShort["RU"];
                 Console.WriteLine("Done");

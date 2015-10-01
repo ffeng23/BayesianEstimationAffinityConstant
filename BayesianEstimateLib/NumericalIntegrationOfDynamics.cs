@@ -11,7 +11,7 @@ using RungeKuttaMethod;
 namespace BayesianEstimateLib
 {
     /// <summary>
-    /// this class is the one use Euler Method to run the numerical integration of SPR dynamics
+    /// this class is the one use Euler and RungaKutta Method to run the numerical integration of SPR dynamics
     /// the reference for the dynamics is as follow,
     /// 1)Glaser, R. W. (1993). Antigen-antibody binding and mass transport by convection and diffusion to a surface: a two-dimensional computer model of binding and dissociation kinetics. Anal Biochem, 213(1), 152-161. doi: 10.1006/abio.1993.1399
     /// 2)Karlsson, R. (1994). Real-time competitive kinetic analysis of interactions between low-molecular-weight ligands in solution and surface-immobilized receptors. Anal Biochem, 221(1), 142-151. doi: 10.1006/abio.1994.1390
