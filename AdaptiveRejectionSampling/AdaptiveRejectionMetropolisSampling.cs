@@ -36,8 +36,8 @@ namespace AdaptiveRejectionSampling
             this.CP_LogTargetDistribution = _LogDist;
             
 
-            this.CP_uniformRng1 = new Random(AccessoryLib.AceessoryLib.SEED);
-            this.CP_uniformRng2 = new Random(AccessoryLib.AceessoryLib.SEED+1);
+            this.CP_uniformRng1 = new Random(AccessoryLib.AccessoryLib.SEED);
+            this.CP_uniformRng2 = new Random(AccessoryLib.AccessoryLib.SEED+1);
 
             this.CP_X_cur = _X_initialCurrent;
         }

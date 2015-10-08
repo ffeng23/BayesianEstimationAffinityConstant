@@ -44,7 +44,7 @@ namespace GibbsSampler
             rngs = new List<Random>(_initials.Count);
             for(int i=0;i<_initials.Count;i++)
             {
-                rngs.Add(new Random(AccessoryLib.AceessoryLib.SEED+i));
+                rngs.Add(new Random(AccessoryLib.AccessoryLib.SEED+i));
             }
         }
 

@@ -33,7 +33,7 @@ namespace TestingLinearRegression
         {
             this.C_X = _x;
             NormalDistribution nd=new NormalDistribution(0, Math.Sqrt(C_Var));
-            Random rng = new Random(AccessoryLib.AceessoryLib.SEED);
+            Random rng = new Random(AccessoryLib.AccessoryLib.SEED);
             for(int i=0;i<_x.Count;i++)
             {
                 C_Y.Add(C_Slope * C_X[i] + C_Intercept + nd.GetRandomValue(rng));

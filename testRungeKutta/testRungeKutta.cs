@@ -70,7 +70,7 @@ namespace testRungeKutta
             double _duration_detach = 400;
 
             double _kM = 3.15E8; //this is now in RU/S
-            double _deltaT = 0.001;
+            double _deltaT = 0.1;
             double _R0 = 20;
 
             Console.WriteLine("run simulation....................");
@@ -108,7 +108,7 @@ namespace testRungeKutta
             Console.WriteLine("Done..................");
 
             //testing two state SPR model with Euler and RK4
-            TwoState ts = new TwoState();
+            InducedFit ts = new InducedFit();
             _ka = 1E6; _kd = 0.005;
             double _ka2 = 0.003, _kd2=0.002;
             _conc = 1E-7; _Rmax = 42;
@@ -120,6 +120,17 @@ namespace testRungeKutta
             DataIO.WriteDataTable(ts.Time_Attach, ts.RU_Detach, "simulation_TwoState_detach_Euler.txt", header);
 
             //ts.setParameters(new double[] { _ka, _kd, _ka2, _kd2, _conc, _Rmax, -1, -1, 1000, 1000, 0.01 });
+            //testing conformational selection SPR model with Euler and RK4
+            ConformationalSelection  cs = new ConformationalSelection();
+            _ka = 0.002; _kd = 0.001;
+            _ka2 = 1E4; _kd2 = 0.001;
+            _conc = 1E-7; _Rmax = 42;
+            cs.setParameters(new double[] { _ka, _kd, _ka2, _kd2, _conc, _Rmax, -1, -1,-1, 1000, 1000, 0.01 });
+            Console.WriteLine("Doing cs with Euler scheme..............");
+            cs.run_Attach_RK();
+            cs.run_Detach_RK();
+            DataIO.WriteDataTable(cs.Time_Attach, cs.RU_Attach, "simulation_CS_attach_Euler.txt", header);
+            DataIO.WriteDataTable(cs.Time_Attach, cs.RU_Detach, "simulation_CS_detach_Euler.txt", header);
 
             Console.WriteLine("Done.............");
             Console.WriteLine("please type Enter to exit.........");

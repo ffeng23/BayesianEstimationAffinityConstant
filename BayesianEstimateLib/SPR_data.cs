@@ -246,6 +246,7 @@ namespace BayesianEstimateLib
         public string FileName
         {
             get { return this._FileName; }
+            set { _FileName = value; }
         }
         /*protected int _NumOfIndividualParams;
         protected int _NumOfCommonParams;

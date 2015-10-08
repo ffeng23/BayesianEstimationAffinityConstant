@@ -25,6 +25,20 @@ namespace BayesianEstimateLib
         {
             //empty constructer
             this.DeltaT = DefaultDeltaT;
+            this._ka = -1;
+            this._kd = -1;
+            this._conc = -1;
+            this._Rmax = -1;
+            this._duration_attach = -1;
+            this._duration_detach = -1;
+            this._kM = -1;
+            //this._deltaT = _deltaT;
+            this.SSPR_r0 = -1;
+            _time_attach=null;
+        _time_detach=null;
+        _ru_attach=null;
+         _ru_detach=null;
+
         }
         // * */
         /// <summary>

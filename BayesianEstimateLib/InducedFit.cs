@@ -8,8 +8,8 @@ namespace BayesianEstimateLib
 
     /// <summary>
     /// model is A+B=AB*=AB, 
-    /// ka, kd is for first phase
-    /// ka2, kd2 is for the second phase
+    /// ka, kd is for first phase, binding phase
+    /// ka2, kd2 is for the second phase, conformational change phase
     /// 
     /// SSPR_r0 is for starting RU for AB (stable form) and R0_AB_Star are for the
     /// transition form.

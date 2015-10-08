@@ -100,7 +100,7 @@ namespace Testing2
             Console.WriteLine("}");
 
             Console.WriteLine("testing.......sampling..........of piecewise function*******************");
-            Random rng = new Random(AccessoryLib.AceessoryLib.SEED );
+            Random rng = new Random(AccessoryLib.AccessoryLib.SEED );
             double temp = puwt.GetRandomValue(rng);
             Console.WriteLine("the sample is "+temp);
 

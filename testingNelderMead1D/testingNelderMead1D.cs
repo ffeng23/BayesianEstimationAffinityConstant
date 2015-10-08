@@ -51,6 +51,10 @@ namespace testingNelderMead1D
             {
                 Console.WriteLine(c.ToString());
             }
+
+
+
+            //end of code.
             Console.WriteLine("done, hit enter to quit");
             Console.ReadLine();
 

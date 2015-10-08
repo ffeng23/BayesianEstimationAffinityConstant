@@ -16,7 +16,10 @@ namespace BayesianEstimateLib
             {
                 //doing nothing
             }
-
+        public Langmuir():base()
+        {
+            //everything has been initialized to -1 or null
+        }
 
         /// <summary>
         /// Langmuir model
@@ -44,9 +47,10 @@ namespace BayesianEstimateLib
         /// <param name="_R0"></param>
         public override void run_Detach()
         {
-
-            _ru_detach[0] = this.SSPR_r0 ;
-
+            if (this.SSPR_r0 > 0)
+                _ru_detach[0] = this.SSPR_r0;
+            else
+                _ru_detach[0] = this._ru_attach[_ru_attach.Count() - 1];
             //_ru.Add(0);
             for (int i = 0; ; i++)
             {
@@ -55,15 +59,59 @@ namespace BayesianEstimateLib
                         break;
 
                     }
-                _ru_detach[i] = this.SSPR_r0  * Math.Exp(-1*_time_detach[i] *_kd) ;
+                _ru_detach[i] = this._ru_detach[0]  * Math.Exp(-1*_time_detach[i] *_kd) ;
                 
                 
             }
         }
-
+        /// <summary>
+        /// set the parameter according to the input _params array
+        /// 0. ka; 1,kd; 2-conc, 3-Rmax, 4-R0_AB,
+        ///      5-association duration, 6-association duration, 7-deltaT
+        ///     So far DON"T have kM in there now.
+        ///     here we also allow variable length of params, but also
+        ///     allow default value of deltaT, duration of association or detach.
+        /// </summary>
+        /// <param name="_params">0. ka; 1,kd; 2-conc, 3-Rmax, 4-R0_AB,
+        ///      5-association duration, 6-association duration, 7-deltaT</param>
         public override void setParameters(double[] _params)
         {
-            throw new NotImplementedException("I am not done yet");
+            //here we allow variable length
+            if (_params.Count() < 5) //5 parameters are the minimum for repeated calling of established object
+            //in this case, we don't have to repeat the filling time arrays etc.
+            //probability 4 is the minimum, but we do this 5 for now.
+            {
+                throw new Exception("the input parameter array is not valid. doesn't contain enough elements");
+            }
+            this._ka = _params[0];
+            this._kd = _params[1];
+            
+            this._conc = _params[2];
+            this._Rmax = _params[3];
+            this.SSPR_r0 = _params[4];
+            //this._R0_AB_Star = _params[7];
+
+            bool updateTimeArrays = false;
+            if (_params.Count() >= 6 && _params[5] > 0)
+            {
+                updateTimeArrays = true;
+                this._duration_attach = _params[5];
+            }
+            if (_params.Count() >= 7 && _params[6] > 0)
+            {
+                updateTimeArrays = true;
+                this._duration_detach = _params[6];
+            }
+            if (_params.Count() >= 8 && _params[7] > 0)
+            {
+                updateTimeArrays = true;
+                this._deltaT = _params[7];
+            }
+
+            if (updateTimeArrays)
+            {
+                _fillTimeArrays();
+            }
         }
     }//end of class
 }

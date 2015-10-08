@@ -49,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConformationSelection.cs" />
+    <Compile Include="ConformationalSelection.cs" />
     <Compile Include="Langmuir.cs" />
     <Compile Include="MassTransportCoefficient_kM.cs" />
     <Compile Include="MassTransportModel.cs" />
@@ -60,6 +60,7 @@
     <Compile Include="SimulationSPR.cs" />
     <Compile Include="SPR_data.cs" />
     <Compile Include="InducedFit.cs" />
+    <Compile Include="TwoStates.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
