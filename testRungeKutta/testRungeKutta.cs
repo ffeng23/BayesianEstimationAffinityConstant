@@ -125,12 +125,27 @@ namespace testRungeKutta
             _ka = 0.002; _kd = 0.001;
             _ka2 = 1E4; _kd2 = 0.001;
             _conc = 1E-7; _Rmax = 42;
-            cs.setParameters(new double[] { _ka, _kd, _ka2, _kd2, _conc, _Rmax, -1, -1,-1, 1000, 1000, 0.01 });
+            cs.setParameters(new double[] { _ka, _kd, _ka2, _kd2, _conc, _Rmax, -1,-1, 1000, 1000, 0.1 });
             Console.WriteLine("Doing cs with Euler scheme..............");
             cs.run_Attach_RK();
             cs.run_Detach_RK();
             DataIO.WriteDataTable(cs.Time_Attach, cs.RU_Attach, "simulation_CS_attach_Euler.txt", header);
             DataIO.WriteDataTable(cs.Time_Attach, cs.RU_Detach, "simulation_CS_detach_Euler.txt", header);
+
+            //ts.setParameters(new double[] { _ka, _kd, _ka2, _kd2, _conc, _Rmax, -1, -1, 1000, 1000, 0.01 });
+            //testing conformational selection SPR model with Euler and RK4
+            TwoStates tws = new TwoStates();
+            _ka = 1e5; _kd = 0.005;
+            double _ka_if = 0.03; double _kd_if = 0.002;
+            double _kon_cs = 1E4; double _koff_cs= 0.001;
+            double _ka_cs = 0.002; double _kd_cs = 0.001;
+            _conc = 1E-7; _Rmax = 250;
+            tws.setParameters(new double[] { _ka, _kd, _ka_if, _kd_if,_kon_cs, _koff_cs, _ka_cs, _kd_cs, _conc, _Rmax, -1, -1, -1,-1, 1000, 1000, 0.1 });
+            Console.WriteLine("Doing two states with Euler scheme..............");
+            tws.run_Attach_RK();
+            tws.run_Detach_RK();
+            DataIO.WriteDataTable(tws.Time_Attach, tws.RU_Attach, "simulation_TWS_attach_Euler.txt", header);
+            DataIO.WriteDataTable(tws.Time_Attach, tws.RU_Detach, "simulation_TWS_detach_Euler.txt", header);
 
             Console.WriteLine("Done.............");
             Console.WriteLine("please type Enter to exit.........");

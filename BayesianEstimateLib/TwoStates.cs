@@ -5,21 +5,17 @@ using System.Text;
 
 namespace BayesianEstimateLib
 {
-
-    //------------NOTE: this one has not been implemented or copied from previous conformational Selection model----------
-    // ----------------NEED TO WORK ON-----------------
     /// <summary>
     /// this is the basic conformation selection model, without kM or offset. also in this model, the R0_B, R0_B_star, R0_AB and R0_AB_star are all determined by the end of attaching phase.
     /// it states that there are two different conformations for the free antibody and these two are in a steady states
-    /// A+B->AB    : ka1, kd1
-    /// A+B*->AB*  : ka2, kd2
-    /// B->B*      : ka3, kd3
-    /// we have ka1,ka2, kd1,kd2, ka3,kd3
-    /// different equations
-    ///  dAB/dt=ka1xAxB-kd1xAB 
-    ///  dAB*/dt=ka1xAxB*-kd2*AB
-    ///  dB/dt=-1x dAB/dt -ka3B+kd3B*
-    ///  dB*/dt=-1xdAB*/dt - ka3B-kd3B*
+    /// A+B->AB->AB*    : kon_if, koff_if, ka_if, kd_if
+    /// B->B*+A->AB*  : ka_cs, kd_cs, kon_cs, koff_cs
+    /// we have kon_if, koff_if (ka, kd, inherited from base class), ka_if,ka_if, kon_cs, koff_cs, ka_cs,kd_cs
+    /// differential equations
+    ///  dAB/dt=kon_ifxAxB-koff_ifxAB-ka_if*AB+kd_if*AB* 
+    ///  dAB*/dt=kon_csxAxB*-koff_cs*AB*+ka_if*AB-kd_if*AB*
+    ///  dB/dt=-1x kon_if*A*B-koff_if*AB -ka_csxB+kd_csxB*
+    ///  dB*/dt=-kon_csxAxB*+koff_csxAB* +ka_csxB-kd3B*
     ///  Bmax=B+B*+AB+AB*
     ///  
     /// </summary>
@@ -27,11 +23,13 @@ namespace BayesianEstimateLib
     {
 
 
-        protected double _ka2;
-        protected double _kd2;
+        protected double _ka_if; //ka2
+        protected double _kd_if; //kd2
 
-        protected double _ka3;
-        protected double _kd3;
+        protected double _kon_cs;
+        protected double _koff_cs;
+        protected double _ka_cs; //ka3
+        protected double _kd_cs;//kd3
 
         //protected double R0_AB;  <<==this is using the base class SSPR_r0
         protected double _R0_AB_Star;
@@ -71,10 +69,12 @@ namespace BayesianEstimateLib
             //set default, uninitialized values;
             this._ka = -1;
             this._kd = -1;
-            this._ka2 = -1;
-            this._kd2 = -1;
-            this._ka3 = -1;
-            this._kd3 = -1;
+            this._ka_if = -1;
+            this._kd_if = -1;
+            this._kon_cs = -1;
+            this._koff_cs = -1;
+            this._ka_cs = -1;
+            this._kd_cs = -1;
             this._conc = -1;
             this._Rmax = -1;
             this.SSPR_r0 = -1;
@@ -94,14 +94,16 @@ namespace BayesianEstimateLib
         /// the constructor with parameter array
         /// </summary>
         /// <param name="_params">contains the parameter lists. 
-        ///     the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2, 4-ka3, 5-kd3, 6-conc, 7-Rmax, 8-R0_AB,
-        ///     9-R0_AB_Star, 10-R0_B, 11-R0_B_Star
-        ///     12-attachDuration, 13-detachDuration,14-deltaT</param>
+        ///     the order is 0-kon_if, 1-koff_if, 2-ka_if, 3-kd_if, 4-kon_cs, 5-koff_cs, 6-ka_cs,7-kd_cs
+        ///     8-conc, 9-Rmax, 10-R0_AB,
+        ///     11-R0_AB_Star, 12-R0_B, 13-R0_B_Star
+        ///     14-attachDuration, 15-detachDuration,16-deltaT
+        ///     </param>
         public TwoStates(double[] _params)
             : base()
         {
             //check for the validity for the input
-            if (_params.Count() < 14)
+            if (_params.Count() < 17)
             {
                 throw new Exception("the input parameter array is not valid. doesn't contain enough elements");
             }
@@ -162,17 +164,20 @@ namespace BayesianEstimateLib
         /// Normally, the R0s (such as R0_AB(*), R0_B(*)) is carried over from attaching phase.
         /// But for the real experiment, there are phase shift, we could get different value by the offset model.
         /// 
-        /// it has the order, the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2, 4-ka3, 5-kd3, 6-conc, 7-Rmax, 8-R0_AB,
-        ///     9-R0_AB_Star, 10-R0_B, 11-R0_B_Star
-        ///     12-attachDuration, 13-detachDuration,14-deltaT
+        /// it has the order, the order is the order is 0-kon_if, 1-koff_if, 2-ka_if, 3-kd_if, 
+        ///     4-kon_cs, 5-koff_cs, 6-ka_cs,7-kd_cs
+        ///     8-conc, 9-Rmax, 10-R0_AB,
+        ///     11-R0_AB_Star, 12-R0_B, 13-R0_B_Star
+        ///     14-attachDuration, 15-detachDuration,16-deltaT
         ///     So far DON"T have kM in there now.
         ///     here we also allow variable length of params, but only
         ///     allow default value of deltaT, duration of association or detach.
         ///     
         /// </summary>
-        /// <param name="_params">it has the order, the order is 0-ka1, 1-kd1, 2-ka2, 3-kd2, 4-ka3, 5-kd3, 6-conc, 7-Rmax, 8-R0_AB,
-        ///     9-R0_AB_Star, 10-R0_B, 11-R0_B_Star
-        ///     12-attachDuration, 13-detachDuration,14-deltaT
+        /// <param name="_params">it has the order, the order is the order is 0-kon_if, 1-koff_if, 2-ka_if, 3-kd_if, 4-kon_cs, 5-koff_cs, 6-ka_cs,7-kd_cs
+        ///     8-conc, 9-Rmax, 10-R0_AB,
+        ///     11-R0_AB_Star, 12-R0_B, 13-R0_B_Star
+        ///     14-attachDuration, 15-detachDuration,16-deltaT
         ///     So far DON"T have kM in there now.
         ///     here we also allow variable length of params, but only
         ///     allow default value of deltaT, duration of association or detach.
@@ -182,58 +187,61 @@ namespace BayesianEstimateLib
         public override void setParameters(double[] _params)
         {
             //here we allow variable length
-            if (_params.Count() < 8) //8 is the minimum number of parameters to be set. since we are doing non-offset model. we can do this.
+            if (_params.Count() < 10) //8 is the minimum number of parameters to be set. since we are doing non-offset model. we can do this.
             {
                 throw new Exception("the input parameter array is not valid. doesn't contain enough elements");
             }
-            this._ka = _params[0];
-            this._kd = _params[1];
-            this._ka2 = _params[2];
-            this._kd2 = _params[3];
-            this._ka3 = _params[4];
-            this._kd3 = _params[5];
-            this._conc = _params[6];
-            this._Rmax = _params[7];
+            this._ka = _params[0];//kon_if
+            this._kd = _params[1];//koff_if
+            this._ka_if = _params[2];
+            this._kd_if = _params[3];
+            this._kon_cs = _params[4];
+            this._koff_cs = _params[5];
+            this._ka_cs = _params[6];
+            this._kd_cs = _params[7];
+            
+            this._conc = _params[8];
+            this._Rmax = _params[9];
 
             //now check for the extra parameters
-            this.SSPR_r0 = _params[6];//by this we don't allow to remeber last round value
-            if (_params.Count() >= 9 && _params[8] > 0)
+            this.SSPR_r0 = _params[10];//by this we don't allow to remeber last round value
+            if (_params.Count() >= 11 && _params[10] > 0)
             {
                 //R0_AB = true;
-                this.SSPR_r0 = _params[8];
+                this.SSPR_r0 = _params[10];
             }
 
             this._R0_AB_Star = -1;
-            if (_params.Count() >= 10 && _params[9] > 0)
-            {
-                this._R0_AB_Star = _params[9];
-            }
-            this._R0_B = -1;
-            if (_params.Count() >= 11 && _params[10] > 0)
-            {
-                this._R0_B = _params[10];
-            }
-            this._R0_B_Star = -1;
             if (_params.Count() >= 12 && _params[11] > 0)
             {
-                this._R0_B_Star = _params[11];
+                this._R0_AB_Star = _params[11];
+            }
+            this._R0_B = -1;
+            if (_params.Count() >= 13 && _params[12] > 0)
+            {
+                this._R0_B = _params[12];
+            }
+            this._R0_B_Star = -1;
+            if (_params.Count() >= 14 && _params[13] > 0)
+            {
+                this._R0_B_Star = _params[13];
             }
 
             bool updateTimeArrays = false;//it could remeber last round value, that is the deal.
-            if (_params.Count() >= 13 && _params[12] > 0)
-            {
-                updateTimeArrays = true;
-                this._duration_attach = _params[12];
-            }
-            if (_params.Count() >= 14 && _params[13] > 0)
-            {
-                updateTimeArrays = true;
-                this._duration_detach = _params[13];
-            }
             if (_params.Count() >= 15 && _params[14] > 0)
             {
                 updateTimeArrays = true;
-                this._deltaT = _params[14];
+                this._duration_attach = _params[14];
+            }
+            if (_params.Count() >= 16 && _params[15] > 0)
+            {
+                updateTimeArrays = true;
+                this._duration_detach = _params[15];
+            }
+            if (_params.Count() >= 17 && _params[16] > 0)
+            {
+                updateTimeArrays = true;
+                this._deltaT = _params[16];
             }
 
             if (updateTimeArrays)
@@ -345,7 +353,7 @@ namespace BayesianEstimateLib
         public override void run_Attach()//this is the Euler
         {
             //check for the validity of input
-            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _ka3 < 0 || _kd3 < 0 || _conc < 0 || _Rmax < 0)
+            if (_ka < 0 || _kd < 0 || _ka_if < 0 || _kd_if < 0 || _kon_cs < 0 || _koff_cs < 0||_ka_cs < 0 || _kd_cs < 0 || _conc < 0 || _Rmax < 0)
             {
                 throw new Exception("unitialized parameters");
             }
@@ -361,23 +369,23 @@ namespace BayesianEstimateLib
             _ru_attach[0] = _R_AB_Star_Att[0] + _R_AB_Att[0];
             //in this conformation selection model, we need to determine R_B and R_B* at the beginning.
             //determine this by the ka3 and kd3 with a steady state
-            this._R_B_Star_Att[0] = this._Rmax / (_kd3 / _ka3 + 1);
+            this._R_B_Star_Att[0] = this._Rmax / (_kd_cs / _ka_cs + 1);
             _R_B_Att[0] = _Rmax - this._R_B_Star_Att[0];
 
             //now star doing the differential equation
-            double dR_AB_Star_per_dt;
+            //double dR_AB_Star_per_dt;
             double dR_AB_per_dt;
             double dR_B_Star_per_dt, dR_B_per_dt;
             double dt;
             for (int i = 0; ; i++)
             {
-                double R_B_i = _Rmax - _R_B_Star_Att[i] - _R_AB_Att[i] - _R_AB_Star_Att[i];
-                dR_AB_per_dt = _ka * _conc * R_B_i
-                                        - _kd * _R_AB_Star_Att[i];// +_kd2 * _R_AB_Att[i] - _ka2 * _R_AB_Star_Att[i];
-                dR_AB_Star_per_dt = _ka2 * _conc * _R_B_Star_Att[i] - _kd2 * _R_AB_Star_Att[i];
+                double R_AB_Star_i = _Rmax - _R_B_Star_Att[i] - _R_AB_Att[i] - _R_B_Att[i];
+                dR_AB_per_dt = _ka * _conc * _R_B_Att[i]
+                                        - _kd * _R_AB_Att[i]-_ka_if * _R_AB_Att[i] + _kd_if * R_AB_Star_i;
+//dR_AB_Star_per_dt = _ka2 * _conc * _R_B_Star_Att[i] - _kd2 * _R_AB_Star_Att[i];
 
-                dR_B_per_dt = -1 * dR_AB_per_dt - _ka3 * R_B_i + _kd3 * _R_B_Star_Att[i];
-                dR_B_Star_per_dt = -1 * dR_AB_Star_per_dt + _ka3 * R_B_i - _kd3 * _R_B_Star_Att[i];
+                dR_B_per_dt = -1 * _ka*_conc*_R_B_Att[i] + _kd * _R_AB_Att[i] -_ka_cs*_R_B_Att[i]+_kd_cs * _R_B_Star_Att[i];
+                dR_B_Star_per_dt =  _ka_cs*_R_B_Att[i] -_kd_cs*_R_B_Star_Att[i]- _kon_cs *_conc* _R_B_Star_Att[i] + _koff_cs * R_AB_Star_i;
 
                 if (i >= _ru_attach.Count - 1)
                 {
@@ -386,9 +394,10 @@ namespace BayesianEstimateLib
                 }
                 dt = this._time_attach[i + 1] - this._time_attach[i];
                 _R_AB_Att[i + 1] = dR_AB_per_dt * dt + _R_AB_Att[i];
-                _R_AB_Star_Att[i + 1] = dR_AB_Star_per_dt * dt + _R_AB_Star_Att[i];
+                //_R_AB_Star_Att[i + 1] = dR_AB_Star_per_dt * dt + _R_AB_Star_Att[i];
                 _R_B_Star_Att[i + 1] = dR_B_Star_per_dt * dt + _R_B_Star_Att[i];
-                _R_B_Att[i + 1] = _Rmax - _R_B_Star_Att[i + 1] - _R_AB_Att[i + 1] - _R_AB_Star_Att[i + 1];
+                _R_B_Att[i + 1] = dR_B_per_dt * dt + _R_B_Att[i];
+                _R_AB_Star_Att[i+1]=_Rmax - _R_B_Star_Att[i + 1] - _R_AB_Att[i + 1] - _R_B_Att[i + 1];
                 _ru_attach[i + 1] = _R_AB_Att[i + 1] + _R_AB_Star_Att[i + 1];
 
             }
@@ -397,7 +406,8 @@ namespace BayesianEstimateLib
         public void run_Attach_RK()//this is the Runge-Kutta
         {
             //check for the validity of input
-            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _ka3 < 0 || _kd3 < 0 || _conc < 0 || _Rmax < 0)
+            //check for the validity of input
+            if (_ka < 0 || _kd < 0 || _ka_if < 0 || _kd_if < 0 || _kon_cs < 0 || _koff_cs < 0 || _ka_cs < 0 || _kd_cs < 0 || _conc < 0 || _Rmax < 0)
             {
                 throw new Exception("unitialized parameters");
             }
@@ -411,6 +421,9 @@ namespace BayesianEstimateLib
             _R_AB_Att[0] = 0;
             _R_AB_Star_Att[0] = 0;
             _ru_attach[0] = _R_AB_Star_Att[0] + _R_AB_Att[0];
+            this._R_B_Star_Att[0] = this._Rmax / (_kd_cs / _ka_cs + 1);
+            _R_B_Att[0] = _Rmax - this._R_B_Star_Att[0];
+
             List<List<double>> RABs = new List<List<double>>();
             //initialize the holder array for RABs
             for (int i = 0; i < _R_AB_Att.Count(); i++)
@@ -446,24 +459,24 @@ namespace BayesianEstimateLib
             List<double> nextRABs = new List<double>();
 
             //in this _RABs, 0 is for R_AB_Star and 1 is for R_AB, 2 for R_B_Star, 3 for R_B
-            //double R_B_i = _Rmax - _RABs[0] - _RABs[1] - _RABs[2];
-            double dR_AB_Star_per_dt = _ka2 * _conc * _RABs[2]
-                                        - _kd2 * _RABs[0];// +_kd2 * _RABs[1] - _ka2 * _RABs[0];
-            double dR_AB_per_dt = _ka * _conc * _RABs[3] - _kd * _RABs[1];
+            //double R_AB_Star_i = _Rmax - _RABs[1] - _RABs[2] - _RABs[3];
+            double dR_AB_per_dt = _ka * _conc * _RABs[3]
+                                    - _kd * _RABs[1] - _ka_if * _RABs[1] + _kd_if * _RABs[0];
+            
+            double dR_B_per_dt = -1 * _ka * _conc * _RABs[3] + _kd * _RABs[1] - _ka_cs * _RABs[3] + _kd_cs * _RABs[2];
+            double dR_B_Star_per_dt = _ka_cs * _RABs[3] - _kd_cs * _RABs[2] - _kon_cs * _conc * _RABs[2] + _koff_cs * _RABs[0];
 
-            double dR_B_Star_per_dt = -1 * dR_AB_Star_per_dt + _ka3 * _RABs[3] - _kd3 * _RABs[2];
-
-            nextRABs.Add(dR_AB_Star_per_dt);
+            nextRABs.Add(0 - dR_AB_per_dt - dR_B_per_dt - dR_B_Star_per_dt);//the fact is that dB+dB*+dAB+dAB*=0; all changes sum to zero.
             nextRABs.Add(dR_AB_per_dt);
             nextRABs.Add(dR_B_Star_per_dt);
-            nextRABs.Add(0 - dR_B_Star_per_dt - dR_AB_per_dt - dR_AB_Star_per_dt); //the fact is that dB+dB*+dAB+dAB*=0; all changes sum to zero.
+            nextRABs.Add( dR_B_per_dt); 
             return nextRABs;
         }
 
         public override void run_Detach() //Euler scheme
         {
             //check for the validity of input
-            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _ka3 < 0 || _kd3 < 0 || _conc < 0 || _Rmax < 0)
+            if (_ka < 0 || _kd < 0 || _ka_if < 0 || _kd_if < 0 || _kon_cs < 0 || _koff_cs < 0 || _ka_cs < 0 || _kd_cs < 0 || _conc < 0 || _Rmax < 0)
             {
                 throw new Exception("unitialized parameters");
             }
@@ -499,21 +512,23 @@ namespace BayesianEstimateLib
             _ru_detach[0] = _R_AB_Det[0] + _R_AB_Star_Det[0];
 
             //now doing the calculation
-            double dR_AB_Star_per_dt;
+            //double dR_AB_Star_per_dt;
             double dR_AB_per_dt;
             double dR_B_Star_per_dt, dR_B_per_dt;
             double dt;
             //double conc0 = 0;
             for (int i = 0; ; i++)
             {
-                double R_B_i = _Rmax - _R_B_Star_Det[i] - _R_AB_Det[i] - _R_AB_Star_Det[i];
-                dR_AB_per_dt = 0//_ka * _conc * R_B_i
-                                        - _kd * _R_AB_Star_Det[i];// +_kd2 * _R_AB_Att[i] - _ka2 * _R_AB_Star_Att[i];
-                dR_AB_Star_per_dt = 0//_ka2 * _conc * _R_B_Star_Att[i] 
-                        - _kd2 * _R_AB_Star_Det[i];
+                double R_AB_Star_i = _Rmax - _R_B_Star_Det[i] - _R_AB_Det[i] - _R_B_Det[i];
+                dR_AB_per_dt = 0//_ka * _conc * _R_B_Att[i]
+                                        - _kd * _R_AB_Det[i] - _ka_if * _R_AB_Det[i] + _kd_if * R_AB_Star_i;
+                //dR_AB_Star_per_dt = _ka2 * _conc * _R_B_Star_Att[i] - _kd2 * _R_AB_Star_Att[i];
 
-                dR_B_per_dt = -1 * dR_AB_per_dt - _ka3 * R_B_i + _kd3 * _R_B_Star_Det[i];
-                dR_B_Star_per_dt = -1 * dR_AB_Star_per_dt + _ka3 * R_B_i - _kd3 * _R_B_Star_Det[i];
+                dR_B_per_dt = 0//-1 * _ka * _conc * _R_B_Att[i] 
+                        + _kd * _R_AB_Det[i] - _ka_cs * _R_B_Det[i] + _kd_cs * _R_B_Star_Det[i];
+                dR_B_Star_per_dt = _ka_cs * _R_B_Det[i] - _kd_cs * _R_B_Star_Det[i] + 
+                        0//_kon_cs * _conc * _R_B_Star_Att[i] 
+                        + _koff_cs * R_AB_Star_i;
 
                 if (i >= _ru_detach.Count - 1)
                 {
@@ -522,9 +537,17 @@ namespace BayesianEstimateLib
                 }
                 dt = this._time_detach[i + 1] - this._time_detach[i];
                 _R_AB_Det[i + 1] = dR_AB_per_dt * dt + _R_AB_Det[i];
-                _R_AB_Star_Det[i + 1] = dR_AB_Star_per_dt * dt + _R_AB_Star_Det[i];
+                //_R_AB_Star_Att[i + 1] = dR_AB_Star_per_dt * dt + _R_AB_Star_Att[i];
                 _R_B_Star_Det[i + 1] = dR_B_Star_per_dt * dt + _R_B_Star_Det[i];
-                _R_B_Det[i + 1] = _Rmax - _R_B_Star_Det[i + 1] - _R_AB_Det[i + 1] - _R_AB_Star_Det[i + 1];
+                _R_B_Det[i + 1] = dR_B_per_dt * dt + _R_B_Det[i];
+                _R_AB_Star_Det[i + 1] = _Rmax - _R_B_Star_Det[i + 1] - _R_AB_Det[i + 1] - _R_B_Det[i + 1];
+                //_ru_attach[i + 1] = _R_AB_Att[i + 1] + _R_AB_Star_Att[i + 1];
+
+                //dt = this._time_detach[i + 1] - this._time_detach[i];
+                //_R_AB_Det[i + 1] = dR_AB_per_dt * dt + _R_AB_Det[i];
+                //_R_AB_Star_Det[i + 1] = dR_AB_Star_per_dt * dt + _R_AB_Star_Det[i];
+                //_R_B_Star_Det[i + 1] = dR_B_Star_per_dt * dt + _R_B_Star_Det[i];
+                //_R_B_Det[i + 1] = _Rmax - _R_B_Star_Det[i + 1] - _R_AB_Det[i + 1] - _R_AB_Star_Det[i + 1];
                 _ru_detach[i + 1] = _R_AB_Det[i + 1] + _R_AB_Star_Det[i + 1];
 
             }
@@ -534,11 +557,11 @@ namespace BayesianEstimateLib
         public void run_Detach_RK() //Runge-Kutta scheme
         {
             //check for the validity of input
-            if (_ka < 0 || _kd < 0 || _ka2 < 0 || _kd2 < 0 || _ka3 < 0 || _kd3 < 0 || _conc < 0 || _Rmax < 0)
+            if (_ka < 0 || _kd < 0 || _ka_if < 0 || _kd_if < 0 || _kon_cs < 0 || _koff_cs < 0 || _ka_cs < 0 || _kd_cs < 0 || _conc < 0 || _Rmax < 0)
             {
                 throw new Exception("unitialized parameters");
             }
-            if (this._time_attach == null || this._time_detach == null)
+            if (this._time_detach == null || this._time_detach == null)
             {
                 throw new Exception("unitialized time arrays");
             }
@@ -596,17 +619,28 @@ namespace BayesianEstimateLib
             //double dR_AB_Star_per_dt = 0 //_ka * _conc * (_Rmax - _RABs[1] - _RABs[0])
             //- _kd * _RABs[0] + _kd2 * _RABs[1] - _ka2 * _RABs[0];
             //double dR_AB_per_dt = _ka2 * _RABs[0] - _kd2 * _RABs[1];
-            double dR_AB_Star_per_dt = 0//_ka2 * _conc * _RABs[2]
-                                        - _kd2 * _RABs[0];// +_kd2 * _RABs[1] - _ka2 * _RABs[0];
-            double dR_AB_per_dt = 0//_ka *_conc* _RABs[3] 
-                                    - _kd * _RABs[1];
+            //in this _RABs, 0 is for R_AB_Star and 1 is for R_AB, 2 for R_B_Star, 3 for R_B
+            //double R_AB_Star_i = _Rmax - _RABs[1] - _RABs[2] - _RABs[3];
+            double dR_AB_per_dt = 0//_ka * _conc * _RABs[3]
+                                    - _kd * _RABs[1] - _ka_if * _RABs[1] + _kd_if * _RABs[0];
 
-            double dR_B_Star_per_dt = -1 * dR_AB_Star_per_dt + _ka3 * _RABs[3] - _kd3 * _RABs[2];
+            double dR_B_per_dt = 0//-1 * _ka * _conc * _RABs[3] 
+                    + _kd * _RABs[1] - _ka_cs * _RABs[3] + _kd_cs * _RABs[2];
+            double dR_B_Star_per_dt = _ka_cs * _RABs[3] - _kd_cs * _RABs[2] -
+                    0//_kon_cs * _conc * _RABs[2] 
+                    + _koff_cs * _RABs[0];
 
-            nextRABs.Add(dR_AB_Star_per_dt);
+            //double dR_AB_Star_per_dt = 0//_ka2 * _conc * _RABs[2]
+            //                            - _kd2 * _RABs[0];// +_kd2 * _RABs[1] - _ka2 * _RABs[0];
+            //double dR_AB_per_dt = 0//_ka *_conc* _RABs[3] 
+            //                        - _kd * _RABs[1];
+
+            //double dR_B_Star_per_dt = -1 * dR_AB_Star_per_dt + _ka3 * _RABs[3] - _kd3 * _RABs[2];
+
+            nextRABs.Add(0-dR_B_Star_per_dt-dR_B_per_dt-dR_AB_per_dt);
             nextRABs.Add(dR_AB_per_dt);
             nextRABs.Add(dR_B_Star_per_dt);
-            nextRABs.Add(0 - dR_B_Star_per_dt - dR_AB_Star_per_dt - dR_AB_per_dt);
+            nextRABs.Add(dR_B_Star_per_dt);
             return nextRABs;
         }
 
