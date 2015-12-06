@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using NelderMeadMethod;
 using BayesianEstimateLib;
+using System.IO;
 
 using AccessoryLib;
 using System.Numerics;
+using Models;
 
 namespace testingNelderMead1D
 {
@@ -52,8 +54,34 @@ namespace testingNelderMead1D
                 Console.WriteLine(c.ToString());
             }
 
+            //*******************************now start doing testing of Gibbs sampler on two state model of spr
+            Console.WriteLine("Hello world!!!************doing the gibbs on two state model");
 
+            //Start doing the 
+            FitController_UnifiedTwoState fc = new FitController_UnifiedTwoState(1E-7, 1000);
 
+            fc.SetupModel();
+            List<List<double>> dist = fc.Run(1500);
+            /*
+            //write ing output
+            Console.WriteLine("writing the output file.......");
+            StreamWriter writer = new StreamWriter("learReg.txt");
+            writer.WriteLine("kon_if\tkoff_if\tka_if\tkd_if\tkon_cs\tkoff_cs\tka_cs\tkd_cs\tRmax\tau");
+            for (int i = 0; i < dist[0].Count; i++)
+            {
+                for (int j = 0; j < dist.Count; j++)
+                {
+                    writer.Write(dist[j][i]);
+                    if (j != dist.Count - 1)
+                    {
+                        writer.Write("\t");
+                    }
+                    else
+                        writer.Write("\r\n");
+                }
+            }
+            Console.WriteLine("done!!!!!!!");
+            writer.Close();*/
             //end of code.
             Console.WriteLine("done, hit enter to quit");
             Console.ReadLine();

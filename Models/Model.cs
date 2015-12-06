@@ -46,7 +46,7 @@ namespace Models
             this.C_ListFixedParameters = new List<bool>();
             for (int i = 0; i < _param.Count; i++)
             {
-                this.C_ListFixedParameters.Add(false);
+                this.C_ListFixedParameters.Add(true);
             }
             this.C_X = null;
             this.C_Y = null;
@@ -68,7 +68,7 @@ namespace Models
                 this.C_ListFixedParameters = new List<bool>();
                 for (int i = 0; i < _param.Count; i++)
                 {
-                    this.C_ListFixedParameters.Add(false);
+                    this.C_ListFixedParameters.Add(true);
                 }
                 this.C_X = _X;
                 this.C_Y = _Y;
@@ -86,6 +86,11 @@ namespace Models
         {
             this.C_ParameterList = null;
             this.C_ListFixedParameters = null;
+            /*this.C_ListFixedParameters = new List<bool>();
+            for (int i = 0; i < _param.Count; i++)
+            {
+                this.C_ListFixedParameters.Add(false);
+            }*/
             this.C_X = _X;
             this.C_Y = _Y;
             this.C_ListIndexToParamsToBeUpdate = null;
@@ -119,6 +124,48 @@ namespace Models
         public void setFunctionDelegateForUpdating(List<int> _func)
         {
             this.C_ListIndexToParamsToBeUpdate  = _func;
+
+            for (int i = 0; i < this.C_ListIndexToParamsToBeUpdate.Count; i++)//_paramsCurrent HAS to be of same length as C_ListIndexToParamsToBeUpdate
+            {
+                switch (this.C_ListIndexToParamsToBeUpdate[i])  //<=== the reason that we are using ListIndextoParamsToBeUpdate is that we want to use this index to skip some elements
+                {
+                    case 0://parameter kon_if
+                        this.C_ListFixedParameters[0] = false;
+                        break;
+                    case 1://parameter koff_if
+                        this.C_ListFixedParameters[1] = false;
+                        break;
+                    case 2://parameter ka_if
+                        this.C_ListFixedParameters[2] = false;
+                        break;
+
+                    case 3://parameter kd_if
+                        this.C_ListFixedParameters[3] = false;
+                        break;
+                    case 4://parameter kon_cs
+                        this.C_ListFixedParameters[4] = false;
+                        break;
+                    case 5://parameter koff_cs
+                        this.C_ListFixedParameters[5] = false;
+                        break;
+                    case 6://parameter ka_cs
+                        this.C_ListFixedParameters[6] = false;
+                        break;
+
+                    case 7://parameter kd_cs
+                        this.C_ListFixedParameters[7] = false;
+                        break;
+                    case 8://parameter Rmax
+                        this.C_ListFixedParameters[8] = false;
+                        break;
+                    case 9://parameter variance
+                        this.C_ListFixedParameters[9] = false;
+                        break;
+                    
+                    default:
+                        throw new System.Exception("unknow parameter length,s omething wrong, not pointer to function distribution is returned!");
+                }
+            }
         }
 
         /// <summary>
@@ -126,20 +173,20 @@ namespace Models
         /// </summary>
         public int NumberOfParameters
         {
-            get { return C_X.Count; }
+            get { return this.C_ParameterList.Count; }
         }
         public int NumberOfDataPoints
         {
-            get { return C_X[1].Count; }
+            get { return C_X[0].Count; }
         }
 
         public List<List<double>> X
         {
-            get { return X; }
+            get { return this.C_X; }
         }
         public List<double> Y
         {
-            get { return Y; }
+            get { return this.C_Y; }
         }
         public List<List<double>> ParameterBounds
         {
@@ -149,7 +196,10 @@ namespace Models
         {
             get { return C_Prior; }
         }
-
+        public List<bool> FixedParameters
+        {
+            get { return C_ListFixedParameters; }
+        }
         /// <summary>
         /// this is the one used to caluculate the Y values based on the parameter input. THIS IS USED BY THE SAMPLING Algorithm to calculate the proposal distribution
         /// it is has to be called by the logConditionalDistribution!!!!
@@ -207,17 +257,23 @@ namespace Models
         public void SetAllParameters(List<double> _list)
         {
             this.C_ParameterList=_list;
+            this.C_ListFixedParameters = new List<bool>();
+            for (int i = 0; i < C_ParameterList.Count; i++)
+            {
+                this.C_ListFixedParameters.Add(true);
+            }
         }
 
-        public void SetAllXs(List<List<double>> _x)
+        public virtual void SetAllXs(List<List<double>> _x)
         {
             this.C_X=_x;
         }
 
-        public void SetAllYs(List<double> _y)
+        public virtual void SetAllYs(List<double> _y)
         {
             this.C_Y=_y;
         }
+        /*
         /// <summary>
         /// a simple helper function to set which ones to be fixed. this is another way compared with the above
         /// discribed "setFunctionDelegateForUpdating" function with the C_ListIndexToParamsToBeUpdate list. This one
@@ -229,7 +285,9 @@ namespace Models
         {
             this.C_ListFixedParameters[_i] = true;
 
-        }
+        }*/
+
+
 
         //declaration of member
         protected List<double> C_ParameterList;

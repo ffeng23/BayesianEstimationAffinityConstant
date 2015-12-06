@@ -55,7 +55,9 @@
     <Compile Include="ELISTATQuadraticFitController.cs" />
     <Compile Include="ELISTATQuadraticModel.cs" />
     <Compile Include="FitController.cs" />
+    <Compile Include="FitController_UnifiedTwoState.cs" />
     <Compile Include="Model.cs" />
+    <Compile Include="Model_UnifiedTwoState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuadraticFitController.cs" />
     <Compile Include="QuadraticModel.cs" />

@@ -369,7 +369,15 @@ namespace BayesianEstimateLib
             _ru_attach[0] = _R_AB_Star_Att[0] + _R_AB_Att[0];
             //in this conformation selection model, we need to determine R_B and R_B* at the beginning.
             //determine this by the ka3 and kd3 with a steady state
-            this._R_B_Star_Att[0] = this._Rmax / (_kd_cs / _ka_cs + 1);
+            if (_ka_cs != 0) //for zero ka_cs
+            {
+                this._R_B_Star_Att[0] = this._Rmax / (_kd_cs / _ka_cs + 1);
+            }
+            else  //ka_cs==0
+            {
+                this._R_B_Star_Att[0] = 0;
+            }
+
             _R_B_Att[0] = _Rmax - this._R_B_Star_Att[0];
 
             //now star doing the differential equation
@@ -432,7 +440,7 @@ namespace BayesianEstimateLib
             }
 
             //RUN runge-kutta 4th order.
-            RungeKuttaMethod.RungeKutta.Solution(this.Derivative_Attach, this._time_attach, ref RABs);
+            RungeKuttaMethod.RungeKutta.Solution(this.Derivative_Attach, this._time_attach, ref RABs);//, _Rmax);
 
             //now let's unpack the output
             for (int i = 1; i < RABs.Count; i++)
@@ -597,7 +605,7 @@ namespace BayesianEstimateLib
                 RABs.Add(new List<double> { _R_AB_Star_Det[i], _R_AB_Det[i], _R_B_Star_Det[i], _R_B_Det[i] });
             }
             //doing the Runge-kutta
-            RungeKuttaMethod.RungeKutta.Solution(this.Derivative_Detach, this._time_detach, ref RABs);
+            RungeKuttaMethod.RungeKutta.Solution(this.Derivative_Detach, this._time_detach, ref RABs);//, _Rmax);
 
             //now let's unpack the output
             for (int i = 1; i < RABs.Count; i++)
@@ -640,7 +648,7 @@ namespace BayesianEstimateLib
             nextRABs.Add(0-dR_B_Star_per_dt-dR_B_per_dt-dR_AB_per_dt);
             nextRABs.Add(dR_AB_per_dt);
             nextRABs.Add(dR_B_Star_per_dt);
-            nextRABs.Add(dR_B_Star_per_dt);
+            nextRABs.Add(dR_B_per_dt);
             return nextRABs;
         }
 

@@ -384,7 +384,7 @@ namespace BayesianEstimateLib
         public static List<double> MergeArrays(List<double> _a1, 
             List<double> _a2)
         {
-            double epsilon=1E-8;
+            double epsilon=1E-15;
             List<double> ret=new List<double>();
             int a1_index = 0, a2_index = 0;
             while (true)

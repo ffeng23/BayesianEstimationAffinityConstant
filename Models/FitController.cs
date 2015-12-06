@@ -49,6 +49,7 @@ namespace Models
             }
 
             GibbsSampler.GibbsSampler gbs = new GibbsSampler.GibbsSampler(C_Parameters, C_Model.updateFunctionDistribution, C_Bounds);
+            gbs.SetUpFixedParameter(this.C_Model.FixedParameters);
             return gbs.Run(_NumSteps );
         }
 
@@ -58,8 +59,9 @@ namespace Models
         protected List<double> C_Parameters;
         protected List<List<double>> C_Bounds; //2-D array holding the bounds.
         //protected GibbsSampler.GibbsSampler C_GS;
-        protected List<List<double>> C_X;
-        protected List<double> C_Y;
+        protected List<List<double>> C_X;//this is the observed values
+
+        protected List<double> C_Y; //this is the observed values
 
 
     }

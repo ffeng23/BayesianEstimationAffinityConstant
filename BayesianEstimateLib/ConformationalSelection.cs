@@ -363,7 +363,13 @@ namespace BayesianEstimateLib
             _ru_attach[0] = _R_AB_Star_Att[0] ;
             //in this conformation selection model, we need to determine R_B and R_B* at the beginning.
             //determine this by the ka3 and kd3 with a steady state
-            this._R_B_Star_Att[0] = this._Rmax / (this._kd / this._ka + 1);
+            if (_ka != 0)
+            {
+                this._R_B_Star_Att[0] = this._Rmax / (this._kd / this._ka + 1);
+            }
+            else
+                this._R_AB_Star_Att[0] = 0;
+
             _R_B_Att[0] = _Rmax - this._R_B_Star_Att[0];
 
             //now star doing the differential equation

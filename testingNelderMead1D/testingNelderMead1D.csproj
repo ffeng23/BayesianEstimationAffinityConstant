@@ -58,6 +58,10 @@
       <Project>{BBE3F738-5A5C-42AF-98D9-A8656C866E36}</Project>
       <Name>BayesianEstimateLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{D1BE4C1D-281C-43FE-A8A3-B83FCDDF6DA3}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

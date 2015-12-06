@@ -41,11 +41,26 @@ namespace GibbsSampler
             this.CP_Initials = _initials;
             this.C_UpdateDistributionDelegate = _updateDistribution ;
             this.C_Bounds = _bounds;
+            this.C_FixedParameter = new List<bool>();
             rngs = new List<Random>(_initials.Count);
             for(int i=0;i<_initials.Count;i++)
             {
                 rngs.Add(new Random(AccessoryLib.AccessoryLib.SEED+i));
+
+                //by default, we run all parameter estimation, false means no fixing
+                this.C_FixedParameter.Add(false);
             }
+
+        }
+
+        public void SetUpFixedParameter(List<bool> _fixed)
+        {
+            if (_fixed.Count != this.C_FixedParameter.Count)
+            {
+                Console.WriteLine("the number of parameter in passing array does not agree with the presetted one, exit");
+                throw new InvalidDataException("the number of parameter in passing array does not agree with the presetted one, exit");
+            }
+            this.C_FixedParameter = _fixed;
         }
 
         public List<List<double>> Run(int _numberOfSamples)
@@ -108,19 +123,31 @@ namespace GibbsSampler
                 {
                     Console.Write(".");
                 }
-                //Console.WriteLine("i:" + i + "$");
+                Console.WriteLine(/*"\tsub " + j + " steps; */"seed is "+AccessoryLib.AccessoryLib.SEED );
+                Console.WriteLine("i:" + i + "$");
                 //for each different paramter, gerenate one sample from its target distribution
                 for (int j = 0; j < samples.Count; j++)
                 {
-                    //Console.Write("\tsub " + j + ".");
- 
-                    //Console.WriteLine("\tsub " + j + " steps; seed is "+AccessoryLib.AceessoryLib.SEED );
-                    LogDistributionFuctionDelegate func = C_UpdateDistributionDelegate(current, j);
-                    arms = new AdaptiveRejectionMetropolisSampling( previous[j],current[j], func, this.C_Bounds[j][0], this.C_Bounds[j][1]);
-                    //Console.WriteLine("\t\tfinished with ARMS set up...");
-                    double newSample = arms.GetRandomSample(rngs[j]);
-                    //Console.WriteLine("\t\tfinished with sample drawing..."+newSample );
-                    samples[j].Add(newSample);
+                    Console.Write("\tsub " + j + ".");
+                    LogDistributionFuctionDelegate func;
+                    double newSample;
+                    if (this.C_FixedParameter[j])
+                    {
+                        Console.WriteLine("\tskipping this parameter......");
+                        //fixed, so go to next parameter
+                        samples[j].Add(current[j]);
+                        newSample = current[j];
+                        //continue;
+                    }
+                    else
+                    {
+                        func = C_UpdateDistributionDelegate(current, j);
+                        arms = new AdaptiveRejectionMetropolisSampling(previous[j], current[j], func, this.C_Bounds[j][0], this.C_Bounds[j][1]);
+                        Console.WriteLine("\t\tfinished with ARMS set up...");
+                        newSample = arms.GetRandomSample(rngs[j]);
+                        Console.WriteLine("\t\tfinished with sample drawing..." + newSample);
+                        samples[j].Add(newSample);
+                    }
                     if (newSample != current[j])
                     {
                         previous[j] = current[j];
@@ -187,5 +214,7 @@ namespace GibbsSampler
         List<List<double>> C_Bounds;
 
         private List<Random> rngs;
+
+        private List<bool> C_FixedParameter;
     }//end of class
 }//end of namespace

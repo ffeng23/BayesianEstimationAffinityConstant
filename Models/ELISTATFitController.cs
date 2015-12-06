@@ -45,8 +45,8 @@ namespace Models
 
             List<double> Ysim=C_Model.SimulateYValues(Xsim, 1.5);
             */
-            C_Model.SetAllXs(this.C_X );
-            C_Model.SetAllYs(this.C_Y);
+            C_Model.SetAllXs(this.C_X );//set up the input Xs based on what is read in.
+            C_Model.SetAllYs(this.C_Y);//set up the input Ys based on what is read in.
 
             //set up prior
             List<List<double>> prior = new List<List<double>> (4);

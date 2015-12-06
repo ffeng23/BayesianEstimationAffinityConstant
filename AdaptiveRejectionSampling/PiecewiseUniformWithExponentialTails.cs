@@ -89,6 +89,7 @@ namespace AdaptiveRejectionSampling
         /// <param name="_upperBound">upper bound, could be infinity</param>
         private void GenerateSupportPoints(int _numberOfSupportPoints, double _lowerBound, double _upperBound, double _initial0, double _initial1)
         {
+            Console.WriteLine("\t\tCreating support points array\n");
             double originalLowerBound = _lowerBound;
             double originalUpperBound = _upperBound;
 
@@ -109,6 +110,7 @@ namespace AdaptiveRejectionSampling
                 }
                 //get the smallest possible x1 that makes the function not zero, since zero will make log invalid.
                 
+            
 
             //add new code to take care of the cases where the nonzero region for Target function is too small, which will leave the support array is too small to partition
                 int loopCount = 0;    
@@ -980,7 +982,10 @@ namespace AdaptiveRejectionSampling
             //doing the middle ones, uniform in exp format
             for (int i = 1; i < _H.Count - 1; i++)
             {
-                temp = _H[i][1] * (_S[i + 1] - _S[i]);
+                //temp = _H[i][1] * (_S[i + 1] - _S[i]);
+                temp = _H[i][1] ; //<===now this is new update code to fix the bug where we here end up with scale the exponent too much
+                    //since in the caller funtion, only this part is going to be exponentialed, but not the part in the above
+                    //2015 11 09 by Feng
                 //p.Add(temp);
                 //p_total += p[i];//the one just added, also could be p[p.count-1]
                 if (temp > max_runningValue)
@@ -1332,10 +1337,12 @@ namespace AdaptiveRejectionSampling
         {
             //first we need to generate the support points array
             GenerateSupportPoints(_numberOfSupportPoints, _lower, _upper, _initialPrevious, _initialCurrent  );
+            Console.WriteLine("\t\tdoing envelope function\n");
             GenerateEnevelopeFunctionOfLogTarget();
+            Console.WriteLine("\t\tdoing pdf function\n");
             CP_PiecewisePDF= GeneratePiecewiseProbabilityOfEnvelopeFunction(CP_EnvelopeFunctionOfLogTarget, CP_SupportPoints);
             CP_PiecewiseCDF = GeneratePiecewiseCDFOfEnvelopeFunction(CP_PiecewisePDF);
-
+            Console.WriteLine("\t\tdone,......\n");
             //it is ready to run sampling
         }
 

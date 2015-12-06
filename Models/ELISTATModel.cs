@@ -129,12 +129,18 @@ namespace Models
         }
 
         /// <summary>
-        /// this is the most important function, 1)it based on the parameterCurrent input to update the model current parameters in
-        ///     the model. so this is important, because the model with current paramter will be used by the Gibbs sampler to draw 
-        ///     distribution; 2) it also return the log conditional pdf to the sampler based on the index, so the Sampler can call
+        /// this is the most important function, 1)it based on the parameterCurrent input to 
+        /// update the model current parameters in
+        ///     the model. so this is important, because the model with current paramter will be used by the Gibbs sampler 
+        ///     to draw 
+        ///     distribution; 2) it also return the log conditional pdf to the sampler based on the index, 
+        ///     so the Sampler can call
         ///     to draw samples. and when Sampler calls to draw it will use the current model parameters.
         /// </summary>
-        /// <param name="_params">the parameter list holding the current values for all the members that is being updated</param>
+        /// <param name="_params">the parameter list holding the current VALUES for all the members 
+        ///                       that is being updated. This is not the index to the parameter meters
+        ///                       but current VALUES of the parameters to be updated 
+        /// </param>
         /// <param name="index">the index for the one that is being updated at this step</param>
         /// <returns>function for log conditional pdf of the current parameter (indicated by index.</returns>
         public override LogDistributionFuctionDelegate updateFunctionDistribution(List<double> _paramsCurrent, int _index)

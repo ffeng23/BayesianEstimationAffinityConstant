@@ -61,7 +61,7 @@ namespace TestingLinearRegression
             lstFunc.Add(1 /*intercept*/);
             lstFunc.Add(2/*var*/);
             lr.setFunctionDelegateForUpdating(lstFunc);
-            GibbsSampler.GibbsSampler gb = new GibbsSampler.GibbsSampler(new List<double> { 3000, 1500, 10 /* */}, lr.updateFunctionDistribution, bounds);
+            GibbsSampler.GibbsSampler gb = new GibbsSampler.GibbsSampler(new List<double> { 6000, 100, 10 /* */}, lr.updateFunctionDistribution, bounds);
             Console.WriteLine("Done...........");
             
             List<List<double>> output = new List<List<double>>();
